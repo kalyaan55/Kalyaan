@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColorWin — Home</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { background:var(--bg); padding-bottom:70px; }
+
+  .user-chip { display:flex; align-items:center; gap:8px; }
+  .avatar { width:34px; height:34px; border-radius:50%; background:var(--orange); color:#fff; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .uname { font-size:13px; font-weight:600; }
+  .uid   { font-size:10px; color:var(--muted); }
+  .logout-btn { background:none; border:none; font-size:18px; cursor:pointer; color:var(--muted); margin-left:4px; }
+  .logout-btn:hover { color:var(--red); }
+
+  /* Balance Card */
+  .bal-card { background:var(--orange); margin:14px; border-radius:14px; padding:18px 20px; color:#fff; position:relative; overflow:hidden; }
+  .bal-card::after { content:'₹'; position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:72px; font-weight:800; opacity:.1; }
+  .bal-label  { font-size:11px; font-weight:600; opacity:.8; text-transform:uppercase; letter-spacing:.5px; }
+  .bal-amount { font-size:30px; font-weight:800; margin:4px 0 14px; }
+  .bal-btns   { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .bal-btn    { background:rgba(255,255,255,.2); border:1.5px solid rgba(255,255,255,.4); border-radius:8px; color:#fff; font-family:'Poppins',sans-serif; font-size:13px; font-weight:600; padding:9px; cursor:pointer; transition:background .2s; }
+  .bal-btn:hover { background:rgba(255,255,255,.3); }
+  .bal-btn.green-btn { background:var(--green); border-color:var(--green2); }
+  .bal-btn.green-btn:hover { background:var(--green2); }
+
+  /* Stats */
+  .stats-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 14px 14px; }
+  .stat-box   { background:#fff; border-radius:10px; border:1px solid var(--border); padding:12px 14px; }
+  .stat-label { font-size:10px; color:var(--muted); font-weight:600; text-transform:uppercase; }
+  .stat-val   { font-size:18px; font-weight:800; margin-top:2px; }
+  .stat-val.orange { color:var(--orange); }
+  .stat-val.green  { color:var(--green); }
+
+  /* Section */
+  .section-head  { padding:14px 14px 8px; display:flex; align-items:center; justify-content:space-between; }
+  .section-title { font-size:15px; font-weight:700; }
+  .sec-badge     { background:#fff3e0; color:var(--orange); font-size:10px; font-weight:600; border-radius:20px; padding:3px 10px; border:1px solid #ffe0b2; }
+
+  /* Featured */
+  .featured-game { background:#fff; border:1.5px solid var(--orange); border-radius:12px; margin:0 14px; display:flex; cursor:pointer; overflow:hidden; transition:transform .15s; }
+  .featured-game:active { transform:scale(.98); }
+  .featured-img  { width:100px; background:#fff3e0; display:flex; align-items:center; justify-content:center; font-size:44px; flex-shrink:0; }
+  .featured-info { padding:14px; flex:1; }
+  .featured-name { font-size:16px; font-weight:800; }
+  .featured-desc { font-size:12px; color:var(--muted); margin:4px 0 12px; }
+  .play-btn      { background:var(--orange); color:#fff; border:none; border-radius:8px; padding:8px 18px; font-family:'Poppins',sans-serif; font-size:12px; font-weight:700; cursor:pointer; }
+
+  /* Games Grid */
+  .games-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:0 14px; margin-bottom:20px; }
+  .game-card  { background:#fff; border:1.5px solid var(--border); border-radius:12px; overflow:hidden; cursor:default; transition:transform .15s; }
+  .game-card.playable { cursor:pointer; border-color:var(--orange); }
+  .game-card.playable:active { transform:scale(.97); }
+  .game-img   { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:36px; position:relative; }
+  .game-lock  { position:absolute; inset:0; background:rgba(255,255,255,.65); display:flex; align-items:center; justify-content:center; }
+  .lock-badge { background:#fff; border:1px solid var(--border); border-radius:6px; font-size:9px; font-weight:600; color:var(--muted); padding:3px 8px; }
+  .game-info  { padding:8px 9px; }
+  .game-name  { font-size:12px; font-weight:700; }
+  .game-sub   { font-size:10px; color:var(--muted); margin-top:1px; }
+  .hot-tag    { position:absolute; top:6px; right:6px; background:var(--orange); color:#fff; font-size:8px; font-weight:700; border-radius:4px; padding:2px 6px; }
+  .new-tag    { position:absolute; top:6px; right:6px; background:var(--green); color:#fff; font-size:8px; font-weight:700; border-radius:4px; padding:2px 6px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="top-header">
+  <div class="logo-text">Color<span>Win</span></div>
+  <div class="user-chip">
+    <div class="avatar" id="homeAvatar">U</div>
+    <div>
+      <div class="uname" id="homeUsername">User</div>
+      <div class="uid"   id="homeUID">CW000000</div>
+    </div>
+    <button class="logout-btn" onclick="logout()">⏻</button>
+  </div>
+</div>
+
+<!-- Balance Card -->
+<div class="bal-card">
+  <div class="bal-label">Total Balance</div>
+  <div class="bal-amount" id="homeBalance">₹10,000</div>
+  <div class="bal-btns">
+    <button class="bal-btn green-btn" onclick="openDW('deposit')">⬆ Deposit</button>
+    <button class="bal-btn"           onclick="openDW('withdraw')">⬇ Withdraw</button>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-label">Total Wins</div>
+    <div class="stat-val green" id="homeTotalWins">₹0</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-label">Bets Placed</div>
+    <div class="stat-val orange" id="homeBets">0</div>
+  </div>
+</div>
+
+<!-- Ticker -->
+<div class="ticker">
+  <span class="ticker-label">LIVE</span>
+  <span class="ticker-text">🎉 Rahul won ₹4,500 &nbsp;&nbsp; 🏆 Priya won ₹9,000 &nbsp;&nbsp; 🎊 Amit won ₹22,500 &nbsp;&nbsp; ✨ Sneha won ₹1,800 &nbsp;&nbsp; 🎉 Raj won ₹5,400 &nbsp;&nbsp; 🏆 Pooja won ₹3,200</span>
+</div>
+
+<!-- Featured Game -->
+<div class="section-head">
+  <div class="section-title">🔥 Featured</div>
+</div>
+<div class="featured-game" onclick="window.location.href='game.html'">
+  <div class="featured-img">🎨</div>
+  <div class="featured-info">
+    <div class="featured-name">Color Prediction</div>
+    <div class="featured-desc">Predict Red / Green / Violet & win up to 9x!</div>
+    <button class="play-btn">▶ Play Now</button>
+  </div>
+</div>
+
+<!-- All Games -->
+<div class="section-head" style="margin-top:10px">
+  <div class="section-title">All Games</div>
+  <div class="sec-badge">8 Games</div>
+</div>
+<div class="games-grid">
+  <div class="game-card playable" onclick="window.location.href='game.html'">
+    <div class="game-img" style="background:#fff3e0">🎨<span class="hot-tag">HOT</span></div>
+    <div class="game-info"><div class="game-name">Color</div><div class="game-sub">Predict & Win</div></div>
+  </div>
+  <div class="game-card">
+    <div class="game-img" style="background:#fafafa">🎰<div class="game-lock"><div class="lock-badge">Soon</div></div></div>
+    <div class="game-info"><div class="game-name">Slots</div><div class="game-sub">Coming Soon</div></div>
+  </div>
+  <div class="game-card">
+    <div class="game-img" style="background:#fafafa">🃏<div class="game-lock"><div class="lock-badge">Soon</div></div><span class="new-tag">NEW</span></div>
+    <div class="game-info"><div class="game-name">Teen Patti</div><div class="game-sub">Coming Soon</div></div>
+  </div>
+  <div class="game-card">
+    <div class="game-img" style="background:#fafafa">🎲<div class="game-lock"><div class="lock-badge">Soon</div></div></div>
+    <div class="game-info"><div class="game-name">Dice Roll</div><div class="game-sub">Coming Soon</div></div>
+  </div>
+  <div class="game-card">
+    <div class="game-img" style="background:#fafafa">🎡<div class="game-lock"><div class="lock-badge">Soon</div></div></div>
+    <div class="game-info"><div class="game-name">Spin Wheel</div><div class="game-sub">Coming Soon</div></div>
+  </div>
+  <div class="game-card">
+    <div class="game-img" style="background:#fafafa">⚽<div class="game-lock"><div class="lock-badge">Soon</div></div><span class="new-tag">NEW</span></div>
+    <div class="game-info"><div class="game-name">Sports</div><div class="game-sub">Coming Soon</div></div>
+  </div>
+  <div class="game-card">
+    <div class="game-img" style="background:#fafafa">🚀<div class="game-lock"><div class="lock-badge">Soon</div></div></div>
+    <div class="game-info"><div class="game-name">Crash</div><div class="game-sub">Coming Soon</div></div>
+  </div>
+  <div class="game-card">
+    <div class="game-img" style="background:#fafafa">🎯<div class="game-lock"><div class="lock-badge">Soon</div></div></div>
+    <div class="game-info"><div class="game-name">Lucky Draw</div><div class="game-sub">Coming Soon</div></div>
+  </div>
+</div>
+
+<script src="storage.js"></script>
+<script>
+  let cu = null;
+
+  window.addEventListener('load', function() {
+    cu = getSession();
+    const users = loadUsers();
+    if (!cu || !users[cu]) { window.location.href = 'index.html'; return; }
+    if (users[cu].blocked)  { clearSession(); window.location.href = 'index.html'; return; }
+    const u = users[cu];
+    document.getElementById('homeAvatar').textContent   = u.name[0].toUpperCase();
+    document.getElementById('homeUsername').textContent = u.name;
+    document.getElementById('homeUID').textContent      = u.uid;
+    refreshStats();
+  });
+
+  function refreshStats() {
+    const users = loadUsers();
+    if (!cu || !users[cu]) return;
+    const u = users[cu];
+    document.getElementById('homeBalance').textContent   = '₹' + (u.balance||0).toLocaleString('en-IN');
+    document.getElementById('homeTotalWins').textContent = '₹' + (u.totalWins||0).toLocaleString('en-IN');
+    document.getElementById('homeBets').textContent      = u.bets || 0;
+  }
+
+  function logout() {
+    clearSession();
+    window.location.href = 'index.html';
+  }
+
+  function openDW(mode) {
+    const phone = '918517923368';
+    const msg = mode === 'deposit'
+      ? 'Hello, I want to *Deposit* coins on ColorWin. Please assist me.'
+      : 'Hello, I want to *Withdraw* coins on ColorWin. Please assist me.';
+    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+  }
+</script>
+</body>
+</html>
