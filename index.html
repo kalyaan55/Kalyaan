@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColorWin — Login</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { background:#fff; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }
+  .auth-box { width:100%; max-width:380px; }
+  .auth-logo { font-size:30px; font-weight:800; color:var(--orange); text-align:center; }
+  .auth-logo span { color:var(--green); }
+  .auth-sub { font-size:13px; color:var(--muted); text-align:center; margin:4px 0 28px; }
+  .auth-tabs { display:flex; border:2px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:22px; }
+  .auth-tab { flex:1; background:none; border:none; font-family:'Poppins',sans-serif; font-size:14px; font-weight:600; padding:11px; cursor:pointer; color:var(--muted); transition:all .2s; }
+  .auth-tab.active { background:var(--orange); color:#fff; }
+  .btn-auth { width:100%; background:var(--orange); border:none; border-radius:10px; color:#fff; font-family:'Poppins',sans-serif; font-size:15px; font-weight:700; padding:13px; cursor:pointer; margin-top:4px; transition:background .2s; }
+  .btn-auth:hover { background:var(--orange2); }
+  .auth-error { font-size:12px; color:var(--red); text-align:center; margin-top:8px; min-height:16px; }
+  .uid-box { background:#f5f5f5; border:1.5px solid var(--border); border-radius:9px; padding:11px 13px; font-size:14px; color:var(--muted); margin-bottom:14px; }
+  .loading { text-align:center; color:var(--muted); font-size:13px; margin-top:10px; }
+</style>
+</head>
+<body>
+<div class="auth-box">
+  <div class="auth-logo">Color<span>Win</span></div>
+  <div class="auth-sub">India's Prediction Gaming Platform</div>
+
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="switchTab('login',this)">Login</button>
+    <button class="auth-tab" onclick="switchTab('register',this)">Register</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="loginForm">
+    <label class="form-label">Username</label>
+    <input class="form-input" id="loginUser" placeholder="Enter username" />
+    <label class="form-label">Password</label>
+    <input class="form-input" type="password" id="loginPass" placeholder="Enter password" />
+    <button class="btn-auth" id="loginBtn" onclick="doLogin()">LOGIN</button>
+    <div class="auth-error" id="loginError"></div>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="registerForm" style="display:none">
+    <label class="form-label">Full Name</label>
+    <input class="form-input" id="regName" placeholder="Your full name" />
+    <label class="form-label">Username</label>
+    <input class="form-input" id="regUser" placeholder="Choose username" oninput="genUID()" />
+    <label class="form-label">Your ID (Auto)</label>
+    <div class="uid-box" id="regUID">Will be generated...</div>
+    <label class="form-label">Password</label>
+    <input class="form-input" type="password" id="regPass" placeholder="Min 6 characters" />
+    <button class="btn-auth" id="regBtn" onclick="doRegister()">CREATE ACCOUNT</button>
+    <div class="auth-error" id="registerError"></div>
+  </div>
+</div>
+
+<script type="module">
+  import {
+    ADMIN_USER, ADMIN_PASS,
+    getSession, setSession, clearSession,
+    getAdminSession, setAdminSession,
+    getUser, saveUser, getAllUsers
+  } from './firebase-config.js';
+
+  // Auto redirect if already logged in
+  window.addEventListener('load', async () => {
+    if (getAdminSession()) { window.location.href = 'admin.html'; return; }
+    const cu = getSession();
+    if (cu) {
+      const user = await getUser(cu);
+      if (user && !user.blocked) { window.location.href = 'home.html'; }
+    }
+  });
+
+  window.switchTab = function(tab, btn) {
+    document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('loginForm').style.display    = tab === 'login'    ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  };
+
+  window.genUID = async function() {
+    const v = document.getElementById('regUser').value.trim();
+    if (!v) { document.getElementById('regUID').textContent = 'Will be generated...'; return; }
+    const users = await getAllUsers();
+    const count = Object.keys(users).length;
+    document.getElementById('regUID').textContent = 'CW' + (100002 + count);
+  };
+
+  window.doLogin = async function() {
+    const u   = document.getElementById('loginUser').value.trim().toLowerCase();
+    const p   = document.getElementById('loginPass').value;
+    const err = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+
+    if (!u || !p) { err.textContent = 'Fill all fields'; return; }
+
+    // Admin check
+    if (u === ADMIN_USER && p === ADMIN_PASS) {
+      setAdminSession();
+      window.location.href = 'admin.html';
+      return;
+    }
+
+    btn.textContent = 'Checking...'; btn.disabled = true;
+    const user = await getUser(u);
+    btn.textContent = 'LOGIN'; btn.disabled = false;
+
+    if (!user)             { err.textContent = 'Username not found'; return; }
+    if (user.password !== p) { err.textContent = 'Wrong password'; return; }
+    if (user.blocked)      { err.textContent = '⛔ Account blocked. Contact admin.'; return; }
+
+    err.textContent = '';
+    setSession(u);
+    window.location.href = 'home.html';
+  };
+
+  window.doRegister = async function() {
+    const name = document.getElementById('regName').value.trim();
+    const user = document.getElementById('regUser').value.trim().toLowerCase();
+    const pass = document.getElementById('regPass').value;
+    const err  = document.getElementById('registerError');
+    const btn  = document.getElementById('regBtn');
+
+    if (!name || !user || !pass) { err.textContent = 'Fill all fields'; return; }
+    if (user.length < 3)         { err.textContent = 'Username min 3 chars'; return; }
+    if (pass.length < 6)         { err.textContent = 'Password min 6 chars'; return; }
+
+    btn.textContent = 'Checking...'; btn.disabled = true;
+    const existing = await getUser(user);
+    if (existing) { err.textContent = 'Username already taken'; btn.textContent = 'CREATE ACCOUNT'; btn.disabled = false; return; }
+
+    const allUsers = await getAllUsers();
+    const uid = 'CW' + (100002 + Object.keys(allUsers).length);
+
+    await saveUser(user, { password:pass, name, uid, balance:10000, totalWins:0, bets:0, blocked:false });
+
+    btn.textContent = 'CREATE ACCOUNT'; btn.disabled = false;
+    err.style.color = 'var(--green)';
+    err.textContent = '✅ Account created! Logging in...';
+    setTimeout(() => { setSession(user); window.location.href = 'home.html'; }, 800);
+  };
+</script>
+</body>
+</html>
