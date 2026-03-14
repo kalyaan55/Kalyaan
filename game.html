@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalyaan — Color Prediction</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { background:var(--bg); padding-bottom:20px; transition:background .3s; }
+
+/* Header */
+.game-header { background:var(--header-bg); border-bottom:1px solid var(--border); padding:10px 14px; display:flex; align-items:center; gap:10px; position:sticky; top:0; z-index:100; box-shadow:var(--shadow); }
+.back-btn    { width:34px; height:34px; border-radius:8px; background:var(--bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:var(--text); flex-shrink:0; }
+.ghead-title { font-size:15px; font-weight:700; flex:1; color:var(--text); }
+
+/* Balance bar */
+.bal-bar { background:linear-gradient(135deg,#1a0050,#4c1d95); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.bal-bar-amount { font-size:20px; font-weight:900; color:#fff; }
+.bal-bar-label  { font-size:10px; color:rgba(255,255,255,.65); font-weight:600; text-transform:uppercase; }
+.dw-btns { display:flex; gap:8px; }
+.dw-btn  { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); border-radius:8px; color:#fff; font-family:'Poppins',sans-serif; font-size:11px; font-weight:700; padding:7px 12px; cursor:pointer; transition:all .2s; white-space:nowrap; }
+.dw-btn:hover { background:rgba(255,255,255,.25); }
+.dw-btn.dep { background:rgba(16,185,129,.7); border-color:rgba(52,211,153,.4); }
+
+/* Period & Timer */
+.period-bar { background:var(--card); border-bottom:1px solid var(--border); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; }
+.plabel { font-size:10px; color:var(--muted); font-weight:600; text-transform:uppercase; }
+.pvalue { font-size:13px; font-weight:700; color:var(--primary); }
+.timer-box { text-align:right; }
+.timer-display { font-size:28px; font-weight:900; color:var(--primary); letter-spacing:2px; line-height:1; }
+.timer-display.urgent { color:var(--red); animation:blink .5s infinite alternate; }
+@keyframes blink { from{opacity:1}to{opacity:.4} }
+.tlabel { font-size:9px; color:var(--muted); }
+
+/* Live players */
+.live-bar { background:var(--card); border-bottom:1px solid var(--border); padding:7px 14px; display:flex; align-items:center; justify-content:space-between; }
+.live-pill { display:flex; align-items:center; gap:6px; background:#d1fae5; border-radius:20px; padding:4px 12px; }
+.live-dot  { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
+.live-text { font-size:11px; font-weight:700; color:var(--green); }
+.period-info { font-size:11px; color:var(--muted); }
+
+/* Bet Section */
+.bet-section { background:var(--card); margin:10px; border-radius:16px; padding:14px; border:1px solid var(--border); box-shadow:var(--shadow); }
+.shead { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+.divider { height:1px; background:var(--border); margin:14px 0; }
+
+/* Color buttons */
+.color-buttons { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:0; }
+.color-btn { border:none; border-radius:12px; padding:14px 6px; font-family:'Poppins',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all .15s; }
+.color-btn:active { transform:scale(.95); }
+.btn-red    { background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; box-shadow:0 4px 12px rgba(239,68,68,.3); }
+.btn-violet { background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; box-shadow:0 4px 12px rgba(124,58,237,.3); }
+.btn-grn    { background:linear-gradient(135deg,#10b981,#059669); color:#fff; box-shadow:0 4px 12px rgba(16,185,129,.3); }
+.cmult { font-size:10px; opacity:.8; display:block; margin-top:2px; }
+
+/* Number grid */
+.number-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin-bottom:0; }
+.num-btn { aspect-ratio:1; border-radius:12px; font-size:17px; font-weight:800; cursor:pointer; font-family:'Poppins',sans-serif; transition:all .15s; border:none; }
+.num-btn:active { transform:scale(.88); }
+.num-0,.num-5 { background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; }
+.num-1,.num-3,.num-6,.num-8 { background:#d1fae5; color:#059669; border:2px solid #6ee7b7; }
+.num-2,.num-4,.num-7,.num-9 { background:#fee2e2; color:#dc2626; border:2px solid #fca5a5; }
+
+/* Big/Small — BELOW numbers */
+.bigsmall-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:0; }
+.bs-btn { border:none; border-radius:12px; padding:13px; font-family:'Poppins',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s; display:flex; flex-direction:column; align-items:center; gap:3px; }
+.bs-btn:active { transform:scale(.95); }
+.btn-big   { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; box-shadow:0 4px 12px rgba(249,115,22,.3); }
+.btn-small { background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; box-shadow:0 4px 12px rgba(59,130,246,.3); }
+.bs-sub    { font-size:10px; opacity:.75; }
+
+/* Lock bar */
+#lockBar { display:none; align-items:center; justify-content:center; gap:8px; background:#fef3c7; border:1.5px solid #fcd34d; border-radius:10px; padding:10px; margin-top:12px; }
+
+/* History */
+.history-section { background:var(--card); margin:0 10px 10px; border-radius:14px; padding:14px; border:1px solid var(--border); box-shadow:var(--shadow); }
+.history-dots { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.dot { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; animation:popIn .3s; }
+@keyframes popIn { from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)} }
+.dot-red    { background:#fee2e2; color:#dc2626; border:2px solid #fca5a5; }
+.dot-green  { background:#d1fae5; color:#059669; border:2px solid #6ee7b7; }
+.dot-violet { background:#ede9fe; color:#7c3aed; border:2px solid #c4b5fd; }
+
+/* Bet Modal */
+.choice-pill { display:flex; align-items:center; gap:10px; background:var(--bg); border-radius:10px; padding:12px 14px; margin-bottom:14px; border:1px solid var(--border); }
+.choice-dot  { width:18px; height:18px; border-radius:50%; flex-shrink:0; }
+.amount-row  { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.amt-btn     { background:var(--bg); border:1.5px solid var(--border); border-radius:8px; color:var(--text); font-family:'Poppins',sans-serif; font-size:13px; font-weight:600; padding:7px 14px; cursor:pointer; transition:all .15s; }
+.amt-btn.sel,.amt-btn:hover { border-color:var(--primary); color:var(--primary); background:var(--primary-light); }
+.custom-amt  { width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:10px; color:var(--text); font-family:'Poppins',sans-serif; font-size:16px; padding:12px 14px; text-align:center; outline:none; transition:border-color .2s; }
+.custom-amt:focus { border-color:var(--primary); }
+.potential { font-size:12px; color:var(--muted); text-align:center; margin-top:8px; }
+.potential span { color:var(--green); font-weight:700; }
+
+/* Win animation overlay */
+.win-overlay { position:fixed; inset:0; z-index:300; pointer-events:none; display:none; }
+.coin { position:absolute; font-size:28px; animation:coinRain 1.2s ease forwards; }
+@keyframes coinRain { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(90vh) rotate(720deg);opacity:0} }
+
+/* Result Modal */
+.result-icon   { font-size:64px; margin-bottom:8px; animation:winBurst .5s ease; }
+@keyframes winBurst { 0%{transform:scale(0) rotate(-15deg);opacity:0} 70%{transform:scale(1.15) rotate(3deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
+.result-title  { font-size:22px; font-weight:900; margin-bottom:4px; color:var(--text); }
+.result-win    { color:var(--green); }
+.result-lose   { color:var(--red); }
+.result-amount { font-size:30px; font-weight:900; color:var(--primary); margin:8px 0; }
+.result-detail { font-size:12px; color:var(--muted); margin-bottom:18px; }
+.btn-ok { background:linear-gradient(135deg,var(--primary),var(--primary2)); border:none; border-radius:10px; color:#fff; font-family:'Poppins',sans-serif; font-size:14px; font-weight:700; padding:12px 40px; cursor:pointer; box-shadow:0 4px 16px rgba(124,58,237,.3); }
+
+.result-badge { display:inline-block; width:28px; height:28px; border-radius:50%; line-height:28px; font-size:11px; font-weight:700; }
+.no-data { text-align:center; color:var(--muted); padding:20px; font-size:12px; }
+</style>
+</head>
+<body>
+
+<!-- Win Coins Overlay -->
+<div class="win-overlay" id="winOverlay"></div>
+
+<!-- Header -->
+<div class="game-header">
+  <div class="back-btn" onclick="window.location.href='home.html'">←</div>
+  <div class="ghead-title">Color Prediction</div>
+  <button class="theme-btn" id="themeBtn" onclick="switchTheme()">🌙</button>
+</div>
+
+<!-- Balance Bar with Deposit/Withdraw -->
+<div class="bal-bar">
+  <div>
+    <div class="bal-bar-label">Balance</div>
+    <div class="bal-bar-amount" id="gameBalDisplay">₹0</div>
+  </div>
+  <div class="dw-btns">
+    <button class="dw-btn dep" onclick="openWA('deposit')">⬆ Deposit</button>
+    <button class="dw-btn"     onclick="openWA('withdraw')">⬇ Withdraw</button>
+  </div>
+</div>
+
+<!-- Period & Timer -->
+<div class="period-bar">
+  <div><div class="plabel">Period</div><div class="pvalue" id="periodNum">#...</div></div>
+  <div class="timer-box"><div class="tlabel">Next Draw</div><div class="timer-display" id="timerDisplay">00:30</div></div>
+</div>
+
+<!-- Live Players -->
+<div class="live-bar">
+  <div class="live-pill"><div class="live-dot"></div><div class="live-text" id="livePlayers">0 Online</div></div>
+  <div class="period-info" id="periodInfoBar">Loading...</div>
+</div>
+
+<!-- Bet Section -->
+<div class="bet-section">
+  <!-- Color Buttons -->
+  <div class="shead">Choose Color</div>
+  <div class="color-buttons">
+    <button class="color-btn btn-red"    onclick="openBet('color','Red','#ef4444',2)">Red<span class="cmult">2×</span></button>
+    <button class="color-btn btn-violet" onclick="openBet('color','Violet','#7c3aed',4.5)">Violet<span class="cmult">4.5×</span></button>
+    <button class="color-btn btn-grn"    onclick="openBet('color','Green','#10b981',2)">Green<span class="cmult">2×</span></button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Number Grid -->
+  <div class="shead">Choose Number (9×)</div>
+  <div class="number-grid">
+    <button class="num-btn num-0" onclick="openBet('number','0','#7c3aed',9)">0</button>
+    <button class="num-btn num-1" onclick="openBet('number','1','#10b981',9)">1</button>
+    <button class="num-btn num-2" onclick="openBet('number','2','#ef4444',9)">2</button>
+    <button class="num-btn num-3" onclick="openBet('number','3','#10b981',9)">3</button>
+    <button class="num-btn num-4" onclick="openBet('number','4','#ef4444',9)">4</button>
+    <button class="num-btn num-5" onclick="openBet('number','5','#7c3aed',9)">5</button>
+    <button class="num-btn num-6" onclick="openBet('number','6','#10b981',9)">6</button>
+    <button class="num-btn num-7" onclick="openBet('number','7','#ef4444',9)">7</button>
+    <button class="num-btn num-8" onclick="openBet('number','8','#10b981',9)">8</button>
+    <button class="num-btn num-9" onclick="openBet('number','9','#ef4444',9)">9</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Big/Small — BELOW numbers -->
+  <div class="shead">Big / Small (2×)</div>
+  <div class="bigsmall-row">
+    <button class="bs-btn btn-big"   onclick="openBet('bigsmall','Big','#f97316',2)">BIG 📈<span class="bs-sub">Numbers 5–9</span></button>
+    <button class="bs-btn btn-small" onclick="openBet('bigsmall','Small','#3b82f6',2)">SMALL 📉<span class="bs-sub">Numbers 0–4</span></button>
+  </div>
+
+  <!-- Lock bar -->
+  <div id="lockBar">
+    <span style="font-size:20px">🔒</span>
+    <span style="font-size:13px;font-weight:700;color:#d97706">Betting Locked — Draw in progress!</span>
+  </div>
+</div>
+
+<!-- History -->
+<div class="history-section">
+  <div class="shead">Recent Results</div>
+  <div class="history-dots" id="historyDots"><div style="color:var(--muted);font-size:12px">Loading...</div></div>
+</div>
+
+<!-- Tabs -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('records',this)">Game Records</button>
+  <button class="tab-btn"        onclick="switchTab('mybets',this)">My Bets</button>
+</div>
+<div class="tab-content active" id="tab-records">
+  <div class="records-wrap"><table class="records-table">
+    <thead><tr><th>Period</th><th>Number</th><th>Color</th><th>Size</th></tr></thead>
+    <tbody id="recordsBody"><tr><td colspan="4" class="no-data">Loading...</td></tr></tbody>
+  </table></div>
+</div>
+<div class="tab-content" id="tab-mybets">
+  <div class="records-wrap"><table class="records-table">
+    <thead><tr><th>Period</th><th>Bet</th><th>Amount</th><th>Result</th></tr></thead>
+    <tbody id="myBetsBody"><tr><td colspan="4" class="no-data">No bets yet</td></tr></tbody>
+  </table></div>
+</div>
+
+<!-- BET MODAL -->
+<div class="modal-overlay" id="betModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">Place Bet</div>
+    <div class="modal-sub">Current Balance: <strong id="modalBal">₹0</strong></div>
+    <div class="choice-pill">
+      <div class="choice-dot" id="modalDot"></div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--text)" id="modalChoiceText"></div>
+        <div style="font-size:11px;color:var(--muted)" id="modalMultText"></div>
+      </div>
+    </div>
+    <div class="amount-row">
+      <button class="amt-btn" onclick="setAmt(10,this)">₹10</button>
+      <button class="amt-btn" onclick="setAmt(50,this)">₹50</button>
+      <button class="amt-btn" onclick="setAmt(100,this)">₹100</button>
+      <button class="amt-btn" onclick="setAmt(500,this)">₹500</button>
+    </div>
+    <input type="number" class="custom-amt" id="betAmt" value="10" min="1">
+    <div class="potential">Potential win: <span id="potentialWin">₹20</span></div>
+    <div class="modal-btns">
+      <button class="btn-cancel"  onclick="closeBetModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmBet()">Confirm Bet ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="modal-overlay center" id="resultModal">
+  <div class="result-modal">
+    <div class="result-icon"   id="resultIcon">🎉</div>
+    <div class="result-title"  id="resultTitle">YOU WIN!</div>
+    <div class="result-amount" id="resultAmount">+₹20</div>
+    <div class="result-detail" id="resultDetail"></div>
+    <button class="btn-ok" onclick="closeResult()">Collect 🎊</button>
+  </div>
+</div>
+
+<script type="module">
+  import {
+    getSession, clearSession, getUser, updateUser,
+    initTheme, toggleTheme, getTheme,
+    getGameState, setGameState, getGameHistory, addGameHistory,
+    addTransaction, validateBet, registerPresence, getLivePlayerCount,
+    db, ref, onValue
+  } from './firebase-config.js';
+
+  const numColors={0:['red','violet'],1:['green'],2:['red'],3:['green'],4:['red'],5:['red','violet'],6:['green'],7:['red'],8:['green'],9:['red']};
+  let cu=null,wallet=0,curBet=null,myBets=[],drawing=false;
+  let currentPeriod=1,timeLeft=30;
+
+  window.addEventListener('load', async()=>{
+    initTheme(); updateThemeBtn();
+    cu=getSession();
+    if(!cu){window.location.href='index.html';return;}
+    const user=await getUser(cu);
+    if(!user||user.blocked){clearSession();window.location.href='index.html';return;}
+    wallet=user.balance||0;
+    updateBalDisplay();
+
+    // Register presence for live count
+    await registerPresence(cu);
+    setInterval(()=>registerPresence(cu),30000);
+
+    // Update live count
+    updateLiveCount();
+    setInterval(updateLiveCount,15000);
+
+    // Load game state
+    const state=await getGameState();
+    const elapsed=Math.floor((Date.now()-(state.lastTick||Date.now()))/1000);
+    timeLeft=Math.max(0,(state.timeLeft||30)-elapsed);
+    currentPeriod=state.period||1;
+    document.getElementById('periodNum').textContent='#'+currentPeriod;
+
+    await renderHistory();
+    await renderRecords();
+    syncTimerDisplay();
+    setInterval(tick,1000);
+
+    // Listen to forced result from admin
+    onValue(ref(db,'gameState/forcedResult'),(snap)=>{
+      // Admin can force result — handled in draw()
+    });
+  });
+
+  async function updateLiveCount(){
+    const n=await getLivePlayerCount();
+    document.getElementById('livePlayers').textContent=n+' Online';
+  }
+
+  function syncTimerDisplay(){
+    const m=Math.floor(timeLeft/60),s=timeLeft%60;
+    const d=document.getElementById('timerDisplay');
+    d.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    d.className='timer-display'+(timeLeft<=5?' urgent':'');
+    document.getElementById('periodInfoBar').textContent=`Period #${currentPeriod}`;
+    setBetLocked(timeLeft<=5);
+  }
+
+  async function tick(){
+    timeLeft--;
+    if(timeLeft<0)timeLeft=0;
+    syncTimerDisplay();
+    if(timeLeft%5===0) await setGameState({timeLeft,period:currentPeriod,lastTick:Date.now()});
+    if(timeLeft<=0&&!drawing) draw();
+  }
+
+  async function draw(){
+    drawing=true;
+    // Check for admin forced result
+    const state=await getGameState();
+    let num,color,size;
+    if(state.forcedResult!==null&&state.forcedResult!==undefined){
+      num=state.forcedResult;
+      // Clear forced result
+      await setGameState({forcedResult:null});
+    } else {
+      num=Math.floor(Math.random()*10);
+    }
+    const cols=numColors[num];
+    color=cols[Math.floor(Math.random()*cols.length)];
+    size=num>=5?'Big':'Small';
+
+    await addGameHistory({period:currentPeriod,number:num,color,size,time:Date.now()});
+    await renderHistory();
+    await renderRecords();
+
+    for(const b of myBets){
+      if(b.period===currentPeriod&&b.result==='PENDING'){
+        let won=false;
+        if(b.type==='color'&&b.choice.toLowerCase()===color) won=true;
+        if(b.type==='color'&&b.choice.toLowerCase()==='violet'&&cols.includes('violet')) won=true;
+        if(b.type==='number'&&parseInt(b.choice)===num) won=true;
+        if(b.type==='bigsmall'&&b.choice==='Big'&&num>=5) won=true;
+        if(b.type==='bigsmall'&&b.choice==='Small'&&num<=4) won=true;
+        b.result=won?'WIN':'LOSE';
+        if(won){
+          b.winAmount=Math.floor(b.amount*b.mult);
+          wallet+=b.winAmount;
+          const user=await getUser(cu);
+          await updateUser(cu,{totalWins:(user.totalWins||0)+b.winAmount,balance:wallet});
+          await addTransaction(cu,{type:'win',amount:b.winAmount,desc:`Won on ${b.choice} — Period #${b.period}`,time:Date.now()});
+        } else {
+          await addTransaction(cu,{type:'lose',amount:b.amount,desc:`Lost on ${b.choice} — Period #${b.period}`,time:Date.now()});
+        }
+        showResult(won,num,color,size,b);
+      }
+    }
+    renderMyBets();
+    updateBalDisplay();
+
+    setTimeout(async()=>{
+      currentPeriod++;
+      timeLeft=30;
+      drawing=false;
+      setBetLocked(false);
+      document.getElementById('periodNum').textContent='#'+currentPeriod;
+      await setGameState({timeLeft:30,period:currentPeriod,lastTick:Date.now()});
+    },3000);
+  }
+
+  function updateBalDisplay(){
+    document.getElementById('gameBalDisplay').textContent='₹'+wallet.toLocaleString('en-IN');
+    document.getElementById('modalBal').textContent='₹'+wallet.toLocaleString('en-IN');
+    getUser(cu).then(u=>{if(u)updateUser(cu,{balance:wallet});});
+  }
+
+  function setBetLocked(locked){
+    document.querySelectorAll('.color-btn,.bs-btn,.num-btn').forEach(b=>{
+      b.disabled=locked;b.style.opacity=locked?'0.38':'1';b.style.cursor=locked?'not-allowed':'pointer';
+    });
+    document.getElementById('lockBar').style.display=locked?'flex':'none';
+  }
+
+  async function renderHistory(){
+    const h=await getGameHistory();
+    document.getElementById('historyDots').innerHTML=h.slice(0,12).map(r=>{
+      const c=r.color==='violet'?'dot-violet':r.color==='red'?'dot-red':'dot-green';
+      return `<div class="dot ${c}">${r.number}</div>`;
+    }).join('')||'<div style="color:var(--muted);font-size:12px">No rounds yet</div>';
+  }
+
+  async function renderRecords(){
+    const h=await getGameHistory();
+    document.getElementById('recordsBody').innerHTML=h.slice(0,20).map(r=>{
+      const bg=r.color==='red'?'#fee2e2':r.color==='green'?'#d1fae5':'#ede9fe';
+      const tc=r.color==='red'?'#dc2626':r.color==='green'?'#059669':'#7c3aed';
+      return `<tr>
+        <td style="font-size:11px;color:var(--muted)">#${r.period}</td>
+        <td><span class="result-badge" style="background:${bg};color:${tc}">${r.number}</span></td>
+        <td style="color:${tc};font-weight:600;text-transform:capitalize">${r.color}</td>
+        <td style="font-size:12px;font-weight:600;color:${r.number>=5?'#f97316':'#3b82f6'}">${r.size}</td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="4" class="no-data">No rounds yet</td></tr>';
+  }
+
+  function renderMyBets(){
+    if(!myBets.length){document.getElementById('myBetsBody').innerHTML='<tr><td colspan="4" class="no-data">No bets yet</td></tr>';return;}
+    document.getElementById('myBetsBody').innerHTML=myBets.slice().reverse().map(b=>{
+      const rc=b.result==='WIN'?'win-text':b.result==='LOSE'?'lose-text':'';
+      const rv=b.result==='WIN'?`+₹${b.winAmount}`:b.result==='LOSE'?`-₹${b.amount}`:'⏳';
+      return `<tr><td style="font-size:11px;color:var(--muted)">#${b.period}</td><td>${b.choice}</td><td>₹${b.amount}</td><td class="${rc}">${rv}</td></tr>`;
+    }).join('');
+  }
+
+  window.switchTab=function(tab,btn){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+tab).classList.add('active');
+    if(tab==='mybets')renderMyBets();
+    if(tab==='records')renderRecords();
+  };
+
+  // Win animation — coins
+  function triggerWinAnimation(){
+    const overlay=document.getElementById('winOverlay');
+    overlay.style.display='block';
+    overlay.innerHTML='';
+    const emojis=['🪙','💰','✨','⭐','🎉','💎'];
+    for(let i=0;i<18;i++){
+      const coin=document.createElement('div');
+      coin.className='coin';
+      coin.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      coin.style.left=Math.random()*100+'%';
+      coin.style.animationDelay=Math.random()*0.8+'s';
+      coin.style.fontSize=(20+Math.random()*20)+'px';
+      overlay.appendChild(coin);
+    }
+    setTimeout(()=>{overlay.style.display='none';overlay.innerHTML='';},2500);
+  }
+
+  function showResult(won,num,color,size,bet){
+    if(won) triggerWinAnimation();
+    document.getElementById('resultIcon').textContent  =won?'🎉':'😔';
+    document.getElementById('resultTitle').textContent =won?'You Win!':'Better Luck!';
+    document.getElementById('resultTitle').className   ='result-title '+(won?'result-win':'result-lose');
+    document.getElementById('resultAmount').textContent=won?`+₹${bet.winAmount}`:`-₹${bet.amount}`;
+    document.getElementById('resultDetail').textContent=`Number: ${num} | Color: ${color} | ${size}`;
+    document.getElementById('resultModal').classList.add('show');
+  }
+  window.closeResult=()=>document.getElementById('resultModal').classList.remove('show');
+
+  window.openBet=function(type,choice,color,mult){
+    if(timeLeft<=5){alert('Wait for next round!');return;}
+    curBet={type,choice,color,mult};
+    document.getElementById('modalTitle').textContent     =type==='color'?'Bet on Color':type==='bigsmall'?'Big / Small':'Bet on Number';
+    document.getElementById('modalChoiceText').textContent=type==='number'?`Number ${choice}`:choice;
+    document.getElementById('modalMultText').textContent  =`Multiplier: ${mult}× · Win up to ₹${Math.floor(500*mult)}`;
+    document.getElementById('modalDot').style.background  =color;
+    document.getElementById('modalBal').textContent       ='₹'+wallet.toLocaleString('en-IN');
+    document.getElementById('betAmt').value=10;
+    document.querySelectorAll('.amt-btn').forEach(b=>b.classList.remove('sel'));
+    updatePotential();
+    document.getElementById('betModal').classList.add('show');
+  };
+  window.closeBetModal=()=>{document.getElementById('betModal').classList.remove('show');curBet=null;};
+  window.setAmt=(v,btn)=>{document.getElementById('betAmt').value=v;document.querySelectorAll('.amt-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');updatePotential();};
+  function updatePotential(){const a=parseInt(document.getElementById('betAmt').value)||0;document.getElementById('potentialWin').textContent='₹'+Math.floor(a*(curBet?.mult||2));}
+  document.getElementById('betAmt').addEventListener('input',updatePotential);
+
+  window.confirmBet=async function(){
+    const amt=parseInt(document.getElementById('betAmt').value);
+    if(!amt||amt<1){alert('Enter valid amount!');return;}
+    // Anti-cheat server-side validation
+    const check=await validateBet(cu,amt);
+    if(!check.valid){alert('❌ '+check.msg);return;}
+    wallet-=amt;
+    const user=await getUser(cu);
+    await updateUser(cu,{bets:(user.bets||0)+1,balance:wallet});
+    await addTransaction(cu,{type:'bet',amount:amt,desc:`Bet on ${curBet.choice} — Period #${currentPeriod}`,time:Date.now()});
+    updateBalDisplay();
+    myBets.push({period:currentPeriod,type:curBet.type,choice:curBet.choice,amount:amt,mult:curBet.mult,result:'PENDING',winAmount:0});
+    renderMyBets();
+    window.closeBetModal();
+  };
+
+  function updateThemeBtn(){document.getElementById('themeBtn').textContent=getTheme()==='dark'?'☀️':'🌙';}
+  window.switchTheme=function(){toggleTheme();updateThemeBtn();};
+  window.openWA=function(m){
+    const msg=m==='deposit'?'Hello, I want to *Deposit* coins on Kalyaan.':'Hello, I want to *Withdraw* coins on Kalyaan.';
+    window.open('https://wa.me/918517923368?text='+encodeURIComponent(msg),'_blank');
+  };
+</script>
+</body>
+</html>
