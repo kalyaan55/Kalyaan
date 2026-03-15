@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalyaan</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { background:var(--bg); padding-bottom:72px; transition:background .3s; overflow-x:hidden; }
+
+/* ── HEADER ── */
+.top-header { background:var(--header-bg); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:var(--shadow); transition:background .3s; }
+.logo-text { font-size:22px; font-weight:900; letter-spacing:-0.5px; background:linear-gradient(135deg,var(--primary),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.header-right { display:flex; align-items:center; gap:10px; }
+.notif-btn { background:none; border:none; font-size:22px; cursor:pointer; color:var(--muted); }
+
+/* ── 5-TAB BOTTOM NAV ── */
+.bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--nav-bg); border-top:1px solid var(--border); display:flex; align-items:stretch; z-index:100; box-shadow:0 -2px 12px rgba(0,0,0,.08); height:62px; transition:background .3s; }
+.nav-item { flex:1; background:none; border:none; color:var(--muted); font-family:'Poppins',sans-serif; font-size:9px; font-weight:600; padding:8px 0 6px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-transform:uppercase; letter-spacing:.3px; transition:color .2s; }
+.nav-item.active { color:var(--primary); }
+.nav-icon { font-size:20px; line-height:1; }
+.nav-item.center-btn { flex:1.3; }
+.nav-center-circle { width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--primary2)); display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(124,58,237,.4); margin-bottom:2px; }
+.nav-center-circle .nav-icon { font-size:22px; }
+.nav-center-label { font-size:9px; font-weight:800; color:var(--primary); text-transform:uppercase; }
+
+/* ── PAGES ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ══════════════════════════════
+   HOME PAGE
+══════════════════════════════ */
+
+/* Balance Card — 91Club style */
+.balance-card { background:#fff; margin:14px; border-radius:18px; padding:20px; box-shadow:0 4px 20px rgba(0,0,0,.08); border:1px solid var(--border); transition:background .3s; }
+[data-theme="dark"] .balance-card { background:var(--card); }
+.bc-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.bc-label { font-size:12px; color:var(--muted); font-weight:600; display:flex; align-items:center; gap:6px; }
+.bc-refresh { background:none; border:none; font-size:16px; cursor:pointer; color:var(--muted); }
+.bc-amount { font-size:32px; font-weight:900; color:var(--text); margin:4px 0 16px; letter-spacing:-0.5px; }
+.bc-amount span { font-size:20px; font-weight:700; color:var(--muted); }
+.bc-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.bc-withdraw { background:linear-gradient(135deg,var(--gold),var(--gold2)); border:none; border-radius:12px; color:#fff; font-family:'Poppins',sans-serif; font-size:14px; font-weight:800; padding:13px; cursor:pointer; box-shadow:0 4px 12px rgba(245,158,11,.3); transition:opacity .2s; }
+.bc-withdraw:hover { opacity:.9; }
+.bc-deposit  { background:linear-gradient(135deg,var(--primary),var(--primary2)); border:none; border-radius:12px; color:#fff; font-family:'Poppins',sans-serif; font-size:14px; font-weight:800; padding:13px; cursor:pointer; box-shadow:0 4px 12px rgba(124,58,237,.3); transition:opacity .2s; }
+.bc-deposit:hover  { opacity:.9; }
+
+/* Announcement bar */
+.announce-bar { background:var(--card); border:1px solid var(--border); margin:0 14px 14px; border-radius:12px; padding:10px 14px; display:flex; align-items:center; gap:10px; }
+.announce-icon { font-size:18px; flex-shrink:0; }
+.announce-txt  { font-size:12px; color:var(--muted); flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.announce-detail { background:var(--primary); color:#fff; border:none; border-radius:20px; font-family:'Poppins',sans-serif; font-size:10px; font-weight:700; padding:4px 10px; cursor:pointer; white-space:nowrap; }
+
+/* Section head */
+.section-head  { padding:12px 14px 8px; display:flex; align-items:center; justify-content:space-between; }
+.section-title { font-size:15px; font-weight:700; color:var(--text); }
+.sec-badge     { background:var(--primary-light); color:var(--primary); font-size:10px; font-weight:600; border-radius:20px; padding:3px 10px; border:1px solid #c4b5fd; }
+
+/* Games Grid */
+.games-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:0 14px; margin-bottom:14px; }
+.game-card  { background:var(--card); border-radius:16px; overflow:hidden; cursor:pointer; transition:transform .15s; box-shadow:var(--shadow); border:1px solid var(--border); }
+.game-card:active { transform:scale(.97); }
+.game-card.locked { cursor:default; }
+.gc-img     { height:90px; display:flex; align-items:center; justify-content:center; font-size:44px; position:relative; }
+.gc-info    { padding:10px 12px; }
+.gc-name    { font-size:14px; font-weight:800; color:var(--text); }
+.gc-sub     { font-size:11px; color:var(--muted); margin-top:2px; }
+.gc-lock    { position:absolute; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; border-radius:0; }
+.gc-lock-badge { background:rgba(255,255,255,.9); border-radius:20px; font-size:10px; font-weight:700; color:var(--muted); padding:4px 12px; }
+.hot-tag { position:absolute; top:8px; right:8px; background:var(--red); color:#fff; font-size:8px; font-weight:700; border-radius:4px; padding:2px 7px; }
+.new-tag { position:absolute; top:8px; right:8px; background:var(--green); color:#fff; font-size:8px; font-weight:700; border-radius:4px; padding:2px 7px; }
+
+/* Ticker */
+.ticker { background:var(--card); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:8px 14px; display:flex; align-items:center; gap:10px; overflow:hidden; }
+.ticker-label { background:linear-gradient(135deg,var(--primary),var(--primary2)); color:#fff; font-size:9px; font-weight:700; letter-spacing:1px; border-radius:4px; padding:3px 8px; white-space:nowrap; }
+.ticker-text  { font-size:11px; color:var(--muted); white-space:nowrap; animation:ticker 28s linear infinite; }
+@keyframes ticker { from{transform:translateX(100%)}to{transform:translateX(-100%)} }
+
+/* ══════════════════════════════
+   ACTIVITY PAGE
+══════════════════════════════ */
+.activity-tabs { display:flex; background:var(--card); border-bottom:1px solid var(--border); overflow-x:auto; scrollbar-width:none; }
+.activity-tabs::-webkit-scrollbar { display:none; }
+.act-tab { flex:0 0 auto; background:none; border:none; border-bottom:3px solid transparent; font-family:'Poppins',sans-serif; font-size:13px; font-weight:600; padding:12px 18px; cursor:pointer; color:var(--muted); transition:all .2s; white-space:nowrap; }
+.act-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+
+/* VIP Card */
+.vip-hero { background:linear-gradient(135deg,#1a0050,#4c1d95); margin:14px; border-radius:18px; padding:20px; color:#fff; position:relative; overflow:hidden; }
+.vip-hero::before { content:''; position:absolute; top:-20px; right:-20px; width:120px; height:120px; background:rgba(255,255,255,.05); border-radius:50%; }
+.vh-badge { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,var(--gold),var(--gold2)); border-radius:20px; padding:5px 14px; margin-bottom:12px; }
+.vh-badge-icon  { font-size:20px; }
+.vh-badge-label { font-size:13px; font-weight:800; color:#fff; }
+.vh-name   { font-size:22px; font-weight:900; margin-bottom:4px; }
+.vh-sub    { font-size:12px; opacity:.7; margin-bottom:14px; }
+.vh-prog-label { font-size:10px; opacity:.7; display:flex; justify-content:space-between; margin-bottom:4px; }
+.vh-prog   { height:8px; background:rgba(255,255,255,.2); border-radius:4px; overflow:hidden; }
+.vh-prog-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold2)); border-radius:4px; transition:width .5s; }
+.vh-stats  { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; margin-top:14px; }
+.vh-stat   { text-align:center; padding:10px 0; border-right:1px solid rgba(255,255,255,.15); }
+.vh-stat:last-child { border-right:none; }
+.vh-stat-val   { font-size:16px; font-weight:800; }
+.vh-stat-label { font-size:9px; opacity:.6; margin-top:2px; text-transform:uppercase; }
+
+/* VIP Levels grid */
+.vip-levels-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:0 14px 14px; }
+.vl-item { background:var(--card); border-radius:12px; padding:10px 6px; text-align:center; border:1px solid var(--border); }
+.vl-item.current { background:var(--primary-light); border-color:var(--primary); }
+.vl-icon  { font-size:22px; margin-bottom:4px; }
+.vl-name  { font-size:8px; color:var(--muted); font-weight:600; }
+.vl-bonus { font-size:9px; color:var(--green); font-weight:700; }
+
+/* Daily bonus card */
+.daily-card { background:linear-gradient(135deg,#059669,#10b981); margin:0 14px 14px; border-radius:16px; padding:16px; color:#fff; display:flex; align-items:center; gap:14px; }
+.dc-icon  { font-size:40px; }
+.dc-info  { flex:1; }
+.dc-title { font-size:15px; font-weight:800; }
+.dc-sub   { font-size:11px; opacity:.8; margin:3px 0 10px; }
+.dc-btn   { background:#fff; border:none; border-radius:8px; color:#059669; font-family:'Poppins',sans-serif; font-size:12px; font-weight:800; padding:8px 16px; cursor:pointer; }
+.dc-btn:disabled { background:rgba(255,255,255,.4); color:rgba(255,255,255,.7); cursor:not-allowed; }
+
+/* ══════════════════════════════
+   PROMOTION PAGE
+══════════════════════════════ */
+.promo-hero { background:linear-gradient(135deg,var(--gold),#b45309); margin:14px; border-radius:18px; padding:20px; color:#fff; text-align:center; }
+.promo-title { font-size:20px; font-weight:900; margin-bottom:6px; }
+.promo-sub   { font-size:12px; opacity:.85; margin-bottom:16px; }
+.ref-code-display { background:rgba(255,255,255,.2); border:2px dashed rgba(255,255,255,.5); border-radius:12px; padding:14px; display:flex; align-items:center; justify-content:space-between; }
+.ref-code-val  { font-size:22px; font-weight:900; letter-spacing:3px; }
+.ref-copy-btn2 { background:rgba(255,255,255,.25); border:none; border-radius:8px; color:#fff; font-family:'Poppins',sans-serif; font-size:12px; font-weight:700; padding:8px 16px; cursor:pointer; }
+.promo-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px; }
+.promo-stat  { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; box-shadow:var(--shadow); }
+.pst-val   { font-size:22px; font-weight:900; color:var(--primary); }
+.pst-label { font-size:11px; color:var(--muted); margin-top:3px; font-weight:600; }
+
+/* How it works */
+.how-card { background:var(--card); margin:0 14px 14px; border-radius:14px; padding:16px; border:1px solid var(--border); box-shadow:var(--shadow); }
+.how-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom:12px; }
+.how-step  { display:flex; align-items:flex-start; gap:12px; margin-bottom:12px; }
+.how-step:last-child { margin-bottom:0; }
+.how-num   { width:28px; height:28px; border-radius:50%; background:var(--primary); color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.how-text  { font-size:12px; color:var(--muted); line-height:1.5; }
+.how-text strong { color:var(--text); }
+
+/* Share button */
+.share-btn { width:calc(100% - 28px); margin:0 14px 14px; background:linear-gradient(135deg,var(--gold),var(--gold2)); border:none; border-radius:14px; color:#fff; font-family:'Poppins',sans-serif; font-size:15px; font-weight:800; padding:15px; cursor:pointer; box-shadow:0 4px 16px rgba(245,158,11,.3); }
+
+/* ══════════════════════════════
+   WALLET PAGE
+══════════════════════════════ */
+.wallet-bal-card { background:linear-gradient(135deg,#1a0050,#4c1d95); margin:14px; border-radius:18px; padding:20px; color:#fff; }
+.wbc-label  { font-size:11px; opacity:.65; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.wbc-amount { font-size:34px; font-weight:900; margin:6px 0 16px; }
+.wbc-btns   { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.wbc-btn    { border:none; border-radius:12px; color:#fff; font-family:'Poppins',sans-serif; font-size:14px; font-weight:800; padding:13px; cursor:pointer; }
+.wbc-wd  { background:linear-gradient(135deg,var(--gold),var(--gold2)); }
+.wbc-dep { background:linear-gradient(135deg,var(--green),var(--green2)); }
+
+/* Transaction list */
+.tx-list   { background:var(--card); margin:0 14px 14px; border-radius:14px; border:1px solid var(--border); overflow:hidden; box-shadow:var(--shadow); }
+.tx-item   { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); }
+.tx-item:last-child { border-bottom:none; }
+.tx-icon   { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.tx-icon.win      { background:#d1fae5; }
+.tx-icon.lose     { background:#fee2e2; }
+.tx-icon.deposit  { background:#dbeafe; }
+.tx-icon.withdraw { background:#fef3c7; }
+.tx-icon.referral,.tx-icon.bonus { background:#ede9fe; }
+.tx-icon.bet { background:var(--bg); }
+.tx-desc   { flex:1; }
+.tx-title  { font-size:12px; font-weight:600; color:var(--text); }
+.tx-time   { font-size:10px; color:var(--muted); margin-top:2px; }
+.tx-amt    { font-size:14px; font-weight:800; }
+.tx-amt.plus  { color:var(--green); }
+.tx-amt.minus { color:var(--red); }
+
+/* ══════════════════════════════
+   ACCOUNT PAGE
+══════════════════════════════ */
+.account-header { background:linear-gradient(135deg,#1a0050,#4c1d95); padding:30px 20px 24px; text-align:center; }
+.acc-avatar { width:76px; height:76px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#fff; font-size:30px; font-weight:900; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; border:3px solid rgba(255,255,255,.3); }
+.acc-name   { font-size:18px; font-weight:800; color:#fff; }
+.acc-uid    { font-size:11px; color:rgba(255,255,255,.6); margin:4px 0 8px; }
+.acc-vip    { display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg,var(--gold),var(--gold2)); border-radius:20px; padding:4px 14px; font-size:11px; font-weight:800; color:#fff; }
+.acc-stats  { display:grid; grid-template-columns:1fr 1fr 1fr; margin-top:16px; }
+.acc-stat   { text-align:center; padding:8px; border-right:1px solid rgba(255,255,255,.15); }
+.acc-stat:last-child { border-right:none; }
+.acc-sv     { font-size:16px; font-weight:800; color:#fff; }
+.acc-sl     { font-size:9px; color:rgba(255,255,255,.6); margin-top:2px; text-transform:uppercase; }
+
+.acc-menu   { background:var(--card); margin:14px; border-radius:14px; overflow:hidden; border:1px solid var(--border); box-shadow:var(--shadow); }
+.acc-row    { display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .15s; }
+.acc-row:last-child { border-bottom:none; }
+.acc-row:hover { background:var(--bg); }
+.acc-row-icon  { font-size:22px; width:36px; text-align:center; }
+.acc-row-info  { flex:1; }
+.acc-row-title { font-size:13px; font-weight:600; color:var(--text); }
+.acc-row-sub   { font-size:11px; color:var(--muted); margin-top:2px; }
+.acc-row-arrow { color:var(--muted); font-size:18px; }
+
+.logout-btn-full { width:calc(100% - 28px); margin:0 14px 14px; background:linear-gradient(135deg,var(--red),#dc2626); border:none; border-radius:14px; color:#fff; font-family:'Poppins',sans-serif; font-size:15px; font-weight:700; padding:14px; cursor:pointer; box-shadow:0 4px 12px rgba(239,68,68,.3); }
+
+/* Daily bonus modal */
+.bonus-modal { background:var(--card); border-radius:22px; padding:28px 22px; width:300px; text-align:center; transform:scale(.85); transition:transform .3s; border:1px solid var(--border); }
+.modal-overlay.show .bonus-modal { transform:scale(1); }
+</style>
+</head>
+<body>
+
+<!-- Daily Bonus Modal -->
+<div class="modal-overlay center" id="bonusModal">
+  <div class="bonus-modal">
+    <div style="font-size:60px;margin-bottom:10px" id="bonusIcon">🎁</div>
+    <div style="font-size:20px;font-weight:900;color:var(--text)" id="bonusTitle">Daily Bonus!</div>
+    <div style="font-size:32px;font-weight:900;color:var(--green);margin:8px 0" id="bonusAmt">+₹5</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px" id="bonusDesc">Bronze member reward</div>
+    <button onclick="closeBonusModal()" style="background:var(--green);border:none;border-radius:10px;color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;padding:12px 40px;cursor:pointer">Collect! 🎉</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="top-header">
+  <div class="logo-text">Kalyaan</div>
+  <div class="header-right">
+    <button class="theme-btn" id="themeBtn" onclick="switchTheme()">🌙</button>
+    <button class="notif-btn">🔔</button>
+  </div>
+</div>
+
+<!-- ══ HOME PAGE ══ -->
+<div class="page active" id="page-home">
+
+  <!-- Balance Card — 91Club style white box -->
+  <div class="balance-card">
+    <div class="bc-top">
+      <div class="bc-label">💳 Wallet Balance</div>
+      <button class="bc-refresh" onclick="refreshBalance()">🔄</button>
+    </div>
+    <div class="bc-amount">₹<span id="homeBalance">0</span></div>
+    <div class="bc-btns">
+      <button class="bc-withdraw" onclick="openWA('withdraw')">Withdraw</button>
+      <button class="bc-deposit"  onclick="openWA('deposit')">Deposit</button>
+    </div>
+  </div>
+
+  <!-- Announcement -->
+  <div class="announce-bar">
+    <div class="announce-icon">📢</div>
+    <div class="announce-txt">Welcome to Kalyaan! We have exciting games and bonuses for you to enjoy.</div>
+    <button class="announce-detail">Detail</button>
+  </div>
+
+  <!-- Ticker -->
+  <div class="ticker">
+    <span class="ticker-label">LIVE</span>
+    <span class="ticker-text" id="liveTicker">🎉 Loading live wins...</span>
+  </div>
+
+  <!-- Games -->
+  <div class="section-head"><div class="section-title">🎮 Games</div><div class="sec-badge" id="gamesBadge">3 Live</div></div>
+  <div class="games-grid">
+
+    <!-- WinGo -->
+    <div class="game-card" onclick="window.location.href='game.html'">
+      <div class="gc-img" style="background:linear-gradient(135deg,#0d0040,#2d0080)">
+        <svg width="60" height="60" viewBox="0 0 100 100">
+          <path d="M50,50 L50,4 A46,46 0 0,1 89.9,27 Z" fill="#ef4444"/>
+          <path d="M50,50 L89.9,27 A46,46 0 0,1 89.9,73 Z" fill="#f97316"/>
+          <path d="M50,50 L89.9,73 A46,46 0 0,1 50,96 Z" fill="#10b981"/>
+          <path d="M50,50 L50,96 A46,46 0 0,1 10.1,73 Z" fill="#3b82f6"/>
+          <path d="M50,50 L10.1,73 A46,46 0 0,1 10.1,27 Z" fill="#7c3aed"/>
+          <path d="M50,50 L10.1,27 A46,46 0 0,1 50,4 Z" fill="#f59e0b"/>
+          <circle cx="50" cy="50" r="15" fill="#0d0030"/>
+          <text x="50" y="54" text-anchor="middle" fill="#fff" font-size="9" font-weight="900" font-family="Arial">WIN</text>
+        </svg>
+        <span class="hot-tag">HOT</span>
+      </div>
+      <div class="gc-info">
+        <div class="gc-name">WinGo</div>
+        <div class="gc-sub">Color · Number · 9×</div>
+      </div>
+    </div>
+
+    <!-- Mines -->
+    <div class="game-card" onclick="window.location.href='mines.html'">
+      <div class="gc-img" style="background:linear-gradient(135deg,#0d2a1f,#1a5c3a)">
+        <span style="font-size:50px">💣</span>
+      </div>
+      <div class="gc-info">
+        <div class="gc-name">Mines</div>
+        <div class="gc-sub">Avoid mines · 1000×</div>
+      </div>
+    </div>
+
+    <!-- Crash -->
+    <div class="game-card" onclick="window.location.href='crash.html'">
+      <div class="gc-img" style="background:linear-gradient(135deg,#0a0a1a,#1a0060)">
+        <span style="font-size:50px">🚀</span>
+        <span class="new-tag">NEW</span>
+      </div>
+      <div class="gc-info">
+        <div class="gc-name">Crash</div>
+        <div class="gc-sub">Cashout before crash!</div>
+      </div>
+    </div>
+
+    <!-- Coming soon games -->
+    <div class="game-card locked">
+      <div class="gc-img" style="background:linear-gradient(135deg,#1a1a35,#2d2d55)">
+        <span style="font-size:44px">🎰</span>
+        <div class="gc-lock"><div class="gc-lock-badge">Coming Soon</div></div>
+      </div>
+      <div class="gc-info"><div class="gc-name">Slots</div><div class="gc-sub">Coming Soon</div></div>
+    </div>
+    <div class="game-card locked">
+      <div class="gc-img" style="background:linear-gradient(135deg,#1a1a35,#2d2d55)">
+        <span style="font-size:44px">🎲</span>
+        <div class="gc-lock"><div class="gc-lock-badge">Coming Soon</div></div>
+      </div>
+      <div class="gc-info"><div class="gc-name">K3</div><div class="gc-sub">Dice · Big/Small</div></div>
+    </div>
+    <div class="game-card locked">
+      <div class="gc-img" style="background:linear-gradient(135deg,#1a1a35,#2d2d55)">
+        <span style="font-size:44px">🃏</span>
+        <div class="gc-lock"><div class="gc-lock-badge">Coming Soon</div></div>
+      </div>
+      <div class="gc-info"><div class="gc-name">Teen Patti</div><div class="gc-sub">Coming Soon</div></div>
+    </div>
+    <div class="game-card locked">
+      <div class="gc-img" style="background:linear-gradient(135deg,#1a1a35,#2d2d55)">
+        <span style="font-size:44px">🚀</span>
+        <div class="gc-lock"><div class="gc-lock-badge">Coming Soon</div></div>
+      </div>
+      <div class="gc-info"><div class="gc-name">Crash</div><div class="gc-sub">Coming Soon</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ACTIVITY PAGE ══ -->
+<div class="page" id="page-activity">
+  <div class="activity-tabs">
+    <button class="act-tab active" onclick="switchActTab('vip',this)">VIP Level</button>
+    <button class="act-tab" onclick="switchActTab('daily',this)">Daily Bonus</button>
+    <button class="act-tab" onclick="switchActTab('leaderboard',this)">Leaderboard</button>
+  </div>
+
+  <!-- VIP Tab -->
+  <div id="act-vip">
+    <div class="vip-hero">
+      <div class="vh-badge"><span class="vh-badge-icon" id="vipBadgeIcon">🥉</span><span class="vh-badge-label" id="vipBadgeName">Bronze</span></div>
+      <div class="vh-name" id="vipName">Level 1 — Bronze</div>
+      <div class="vh-sub">Daily bonus: <strong id="vipDailyBonus" style="color:#fbbf24">₹5</strong> · Bet more to level up!</div>
+      <div class="vh-prog-label"><span>Progress</span><span id="vipPct">0%</span></div>
+      <div class="vh-prog"><div class="vh-prog-fill" id="vipProgFill" style="width:0%"></div></div>
+      <div class="vh-stats">
+        <div class="vh-stat"><div class="vh-stat-val" id="actBalance">₹0</div><div class="vh-stat-label">Balance</div></div>
+        <div class="vh-stat"><div class="vh-stat-val" id="actBets">0</div><div class="vh-stat-label">Bets</div></div>
+        <div class="vh-stat"><div class="vh-stat-val" id="actWins">₹0</div><div class="vh-stat-label">Won</div></div>
+      </div>
+    </div>
+    <div class="section-head"><div class="section-title">⭐ All VIP Levels</div></div>
+    <div class="vip-levels-grid" id="vipLevelsGrid"></div>
+  </div>
+
+  <!-- Daily Tab -->
+  <div id="act-daily" style="display:none">
+    <div class="daily-card" style="margin:14px">
+      <div class="dc-icon">🎰</div>
+      <div class="dc-info">
+        <div class="dc-title">Daily Login Bonus</div>
+        <div class="dc-sub" id="actDailySub">Claim your daily reward!</div>
+        <button class="dc-btn" id="actDailyBtn" onclick="claimDailyBonus()">Claim Now 🎁</button>
+      </div>
+    </div>
+    <div class="section-head"><div class="section-title">💡 VIP Bonus Table</div></div>
+    <div style="background:var(--card);margin:0 14px;border-radius:14px;border:1px solid var(--border);overflow:hidden">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:var(--bg)">
+          <th style="padding:10px;text-align:center;font-size:11px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Level</th>
+          <th style="padding:10px;text-align:center;font-size:11px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Min Bets</th>
+          <th style="padding:10px;text-align:center;font-size:11px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Daily Bonus</th>
+        </tr></thead>
+        <tbody id="bonusTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Leaderboard Tab -->
+  <div id="act-leaderboard" style="display:none">
+    <div class="section-head"><div class="section-title">🏆 Top Winners</div></div>
+    <div style="background:var(--card);margin:0 14px;border-radius:14px;border:1px solid var(--border);overflow:hidden" id="leaderboardList">
+      <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROMOTION PAGE ══ -->
+<div class="page" id="page-promotion">
+  <div class="promo-hero">
+    <div class="promo-title">🎁 Refer & Earn</div>
+    <div class="promo-sub">Invite friends → You earn ₹50, they earn ₹20!</div>
+    <div class="ref-code-display">
+      <div class="ref-code-val" id="promoRefCode">Loading...</div>
+      <button class="ref-copy-btn2" onclick="copyRefCode()">📋 Copy</button>
+    </div>
+  </div>
+
+  <div class="promo-stats">
+    <div class="promo-stat"><div class="pst-val" id="promoRefCount">0</div><div class="pst-label">Friends Invited</div></div>
+    <div class="promo-stat"><div class="pst-val" id="promoRefEarn">₹0</div><div class="pst-label">Total Earned</div></div>
+  </div>
+
+  <button class="share-btn" onclick="shareRefCode()">🚀 Share Referral Link</button>
+
+  <div class="how-card">
+    <div class="how-title">📖 How It Works</div>
+    <div class="how-step">
+      <div class="how-num">1</div>
+      <div class="how-text"><strong>Share your code</strong> — Copy your unique referral code and share with friends</div>
+    </div>
+    <div class="how-step">
+      <div class="how-num">2</div>
+      <div class="how-text"><strong>Friend registers</strong> — They enter your code while signing up</div>
+    </div>
+    <div class="how-step">
+      <div class="how-num">3</div>
+      <div class="how-text"><strong>You earn ₹50</strong> — Automatically added to your balance</div>
+    </div>
+    <div class="how-step">
+      <div class="how-num">4</div>
+      <div class="how-text"><strong>Friend gets ₹20</strong> — Welcome bonus credited to their account</div>
+    </div>
+  </div>
+
+  <!-- 5% deposit bonus promo -->
+  <div style="background:linear-gradient(135deg,#059669,#10b981);margin:0 14px 14px;border-radius:16px;padding:16px;color:#fff">
+    <div style="font-size:15px;font-weight:800;margin-bottom:4px">💰 5% Deposit Bonus</div>
+    <div style="font-size:12px;opacity:.85">Every deposit gets 5% bonus automatically added to your wallet!</div>
+  </div>
+</div>
+
+<!-- ══ WALLET PAGE ══ -->
+<div class="page" id="page-wallet">
+  <!-- Balance card -->
+  <div class="wallet-bal-card">
+    <div class="wbc-label">Total Balance</div>
+    <div class="wbc-amount" id="walletBalance">₹0</div>
+    <div class="wbc-btns">
+      <button class="wbc-btn wbc-wd"  onclick="openWA('withdraw')">Withdraw</button>
+      <button class="wbc-btn wbc-dep" onclick="openWA('deposit')">Deposit</button>
+    </div>
+  </div>
+
+  <div class="section-head"><div class="section-title">📋 Transaction History</div></div>
+  <div class="tx-list" id="walletTxList">
+    <div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">Loading...</div>
+  </div>
+</div>
+
+<!-- ══ ACCOUNT PAGE ══ -->
+<div class="page" id="page-account">
+  <div class="account-header">
+    <div class="acc-avatar" id="accAvatar">U</div>
+    <div class="acc-name" id="accName">User</div>
+    <div class="acc-uid"  id="accUID">KY000000</div>
+    <div class="acc-vip"  id="accVIP">🥉 Bronze</div>
+    <div class="acc-stats">
+      <div class="acc-stat"><div class="acc-sv" id="accBal">₹0</div><div class="acc-sl">Balance</div></div>
+      <div class="acc-stat"><div class="acc-sv" id="accBets">0</div><div class="acc-sl">Bets</div></div>
+      <div class="acc-stat"><div class="acc-sv" id="accWins">₹0</div><div class="acc-sl">Won</div></div>
+    </div>
+  </div>
+
+  <div class="section-head"><div class="section-title">👤 Account Info</div></div>
+  <div class="acc-menu">
+    <div class="acc-row" onclick="copyText(document.getElementById('accUID').textContent)">
+      <div class="acc-row-icon">🆔</div>
+      <div class="acc-row-info"><div class="acc-row-title">Player ID</div><div class="acc-row-sub" id="accUIDrow">KY000000</div></div>
+      <div class="acc-row-arrow">📋</div>
+    </div>
+    <div class="acc-row" onclick="copyText(document.getElementById('accRefCode').textContent)">
+      <div class="acc-row-icon">🎁</div>
+      <div class="acc-row-info"><div class="acc-row-title">Referral Code</div><div class="acc-row-sub" id="accRefCode">—</div></div>
+      <div class="acc-row-arrow">📋</div>
+    </div>
+    <div class="acc-row" onclick="openWA('deposit')">
+      <div class="acc-row-icon">⬆️</div>
+      <div class="acc-row-info"><div class="acc-row-title">Deposit</div><div class="acc-row-sub">Via WhatsApp</div></div>
+      <div class="acc-row-arrow">›</div>
+    </div>
+    <div class="acc-row" onclick="openWA('withdraw')">
+      <div class="acc-row-icon">⬇️</div>
+      <div class="acc-row-info"><div class="acc-row-title">Withdraw</div><div class="acc-row-sub">Via WhatsApp</div></div>
+      <div class="acc-row-arrow">›</div>
+    </div>
+    <div class="acc-row" onclick="switchTab('activity')">
+      <div class="acc-row-icon">⭐</div>
+      <div class="acc-row-info"><div class="acc-row-title">VIP Level</div><div class="acc-row-sub" id="accVIProw">Bronze — Level 1</div></div>
+      <div class="acc-row-arrow">›</div>
+    </div>
+    <div class="acc-row">
+      <div class="acc-row-icon">📅</div>
+      <div class="acc-row-info"><div class="acc-row-title">Joined</div><div class="acc-row-sub" id="accJoined">—</div></div>
+    </div>
+  </div>
+
+  <button class="logout-btn-full" onclick="doLogout()">⏻ Logout</button>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<div class="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="switchTab('home')">
+    <span class="nav-icon">🏠</span>Home
+  </button>
+  <button class="nav-item" id="nav-activity" onclick="switchTab('activity')">
+    <span class="nav-icon">⭐</span>Activity
+  </button>
+  <button class="nav-item center-btn" id="nav-game" onclick="window.location.href='game.html'">
+    <div class="nav-center-circle"><span class="nav-icon">🎮</span></div>
+    <span class="nav-center-label">Play</span>
+  </button>
+  <button class="nav-item" id="nav-wallet" onclick="switchTab('wallet')">
+    <span class="nav-icon">👛</span>Wallet
+  </button>
+  <button class="nav-item" id="nav-account" onclick="switchTab('account')">
+    <span class="nav-icon">👤</span>Account
+  </button>
+</div>
+
+<script type="module">
+  import {
+    getSession, clearSession, getUser, updateUser,
+    initTheme, toggleTheme, getTheme,
+    getLeaderboard, getTransactions,
+    claimDailyBonus as fbClaimDailyBonus,
+    getVIPLevel, VIP_LEVELS,
+    addTransaction
+  } from './firebase-config.js';
+
+  const TX_ICONS = {win:'🏆',lose:'💸',deposit:'💰',withdraw:'🏧',referral:'🎁',bonus:'🎁',bet:'🎲'};
+  let cu=null, userData=null, activeTab='home';
+
+  window.addEventListener('load', async()=>{
+    initTheme(); updateThemeBtn();
+    cu=getSession();
+    if(!cu){window.location.href='index.html';return;}
+    userData=await getUser(cu);
+    if(!userData||userData.blocked){clearSession();window.location.href='index.html';return;}
+    renderAllData();
+    loadTicker();
+  });
+
+  async function renderAllData(){
+    const u=userData;
+    const vip=getVIPLevel(u.bets||0);
+    // Home
+    document.getElementById('homeBalance').textContent=(u.balance||0).toLocaleString('en-IN');
+    // Activity
+    document.getElementById('vipBadgeIcon').textContent=vip.badge;
+    document.getElementById('vipBadgeName').textContent=vip.name;
+    document.getElementById('vipName').textContent=`Level ${vip.level} — ${vip.name}`;
+    document.getElementById('vipDailyBonus').textContent='₹'+vip.dailyBonus;
+    document.getElementById('actBalance').textContent='₹'+(u.balance||0).toLocaleString('en-IN');
+    document.getElementById('actBets').textContent=u.bets||0;
+    document.getElementById('actWins').textContent='₹'+(u.totalWins||0).toLocaleString('en-IN');
+    const nextVip=VIP_LEVELS.find(v=>v.level===vip.level+1);
+    const prevMin=vip.level>1?VIP_LEVELS[vip.level-2].minBets:0;
+    const nextMin=nextVip?nextVip.minBets:vip.minBets;
+    const pct=nextVip?Math.min(100,Math.round(((u.bets||0)-prevMin)/(nextMin-prevMin)*100)):100;
+    document.getElementById('vipProgFill').style.width=pct+'%';
+    document.getElementById('vipPct').textContent=pct+'%';
+    // Daily
+    const today=new Date().toDateString();
+    const claimed=u.lastLoginBonus===today;
+    document.getElementById('actDailyBtn').disabled=claimed;
+    document.getElementById('actDailySub').textContent=claimed?`✅ Claimed! Come back tomorrow`:`Claim ₹${vip.dailyBonus} (${vip.name} reward)`;
+    // VIP levels grid
+    document.getElementById('vipLevelsGrid').innerHTML=VIP_LEVELS.map(v=>`
+      <div class="vl-item${v.level<=vip.level?' current':''}">
+        <div class="vl-icon">${v.badge}</div>
+        <div class="vl-name">${v.name}</div>
+        <div class="vl-bonus">₹${v.dailyBonus}/d</div>
+      </div>`).join('');
+    // Bonus table
+    document.getElementById('bonusTableBody').innerHTML=VIP_LEVELS.map(v=>`
+      <tr style="${v.level===vip.level?'background:var(--primary-light)':''}">
+        <td style="padding:9px;text-align:center;border-bottom:1px solid var(--border)">${v.badge} ${v.name}</td>
+        <td style="padding:9px;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)">${v.minBets}</td>
+        <td style="padding:9px;text-align:center;border-bottom:1px solid var(--border);font-weight:700;color:var(--green)">₹${v.dailyBonus}</td>
+      </tr>`).join('');
+    // Promotion
+    document.getElementById('promoRefCode').textContent=u.referralCode||'—';
+    document.getElementById('promoRefCount').textContent=u.referralCount||0;
+    document.getElementById('promoRefEarn').textContent='₹'+(u.referralEarnings||0).toLocaleString('en-IN');
+    // Wallet
+    document.getElementById('walletBalance').textContent='₹'+(u.balance||0).toLocaleString('en-IN');
+    // Account
+    document.getElementById('accAvatar').textContent=u.name[0].toUpperCase();
+    document.getElementById('accName').textContent=u.name;
+    document.getElementById('accUID').textContent=u.uid;
+    document.getElementById('accUIDrow').textContent=u.uid;
+    document.getElementById('accVIP').textContent=vip.badge+' '+vip.name;
+    document.getElementById('accVIProw').textContent=vip.name+' — Level '+vip.level;
+    document.getElementById('accRefCode').textContent=u.referralCode||'—';
+    document.getElementById('accBal').textContent='₹'+(u.balance||0).toLocaleString('en-IN');
+    document.getElementById('accBets').textContent=u.bets||0;
+    document.getElementById('accWins').textContent='₹'+(u.totalWins||0).toLocaleString('en-IN');
+    document.getElementById('accJoined').textContent=u.joinedAt?new Date(u.joinedAt).toLocaleDateString('en-IN'):'—';
+  }
+
+  // ── Tab switching ──
+  window.switchTab=function(tab){
+    activeTab=tab;
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('page-'+tab).classList.add('active');
+    const navEl=document.getElementById('nav-'+tab);
+    if(navEl) navEl.classList.add('active');
+    // Load tab-specific data
+    if(tab==='activity') loadLeaderboard();
+    if(tab==='wallet')   loadTransactions();
+    if(tab==='promotion'){
+      userData=null;
+      getUser(cu).then(u=>{if(u){userData=u;renderAllData();}});
+    }
+  };
+
+  window.switchActTab=function(tab,btn){
+    document.querySelectorAll('.act-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('act-vip').style.display       = tab==='vip'?'block':'none';
+    document.getElementById('act-daily').style.display     = tab==='daily'?'block':'none';
+    document.getElementById('act-leaderboard').style.display = tab==='leaderboard'?'block':'none';
+    if(tab==='leaderboard') loadLeaderboard();
+  };
+
+  // ── Daily Bonus ──
+  window.claimDailyBonus=async function(){
+    const result=await fbClaimDailyBonus(cu);
+    if(!result.success){alert(result.msg);return;}
+    userData=await getUser(cu);
+    renderAllData();
+    document.getElementById('bonusIcon').textContent=result.vip.badge;
+    document.getElementById('bonusTitle').textContent='Daily Bonus Claimed!';
+    document.getElementById('bonusAmt').textContent='+₹'+result.amount;
+    document.getElementById('bonusDesc').textContent=result.vip.name+' member reward';
+    document.getElementById('bonusModal').classList.add('show');
+  };
+  window.closeBonusModal=()=>document.getElementById('bonusModal').classList.remove('show');
+
+  // ── Leaderboard ──
+  async function loadLeaderboard(){
+    const lb=await getLeaderboard();
+    if(!lb.length){document.getElementById('leaderboardList').innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">No data yet</div>';return;}
+    document.getElementById('leaderboardList').innerHTML=lb.map((u,i)=>{
+      const rc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
+      const rl=i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border)">
+        <div style="width:28px;height:28px;border-radius:50%;background:${i<3?'linear-gradient(135deg,'+['#f59e0b,#fbbf24','#9ca3af,#d1d5db','#b45309,#d97706'][i]:'var(--primary-light)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${i<3?'#fff':'var(--primary)'};">${rl}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${u.name}</div>
+          <div style="font-size:10px;color:var(--muted)">${u.uid} · ${u.bets} bets</div>
+        </div>
+        <div style="font-size:13px;font-weight:800;color:var(--green)">₹${(u.totalWins||0).toLocaleString('en-IN')}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Transactions ──
+  async function loadTransactions(){
+    const txs=await getTransactions(cu);
+    if(!txs.length){document.getElementById('walletTxList').innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No transactions yet</div>';return;}
+    document.getElementById('walletTxList').innerHTML=txs.map(tx=>{
+      const icon=TX_ICONS[tx.type]||'💳';
+      const isPlus=['win','deposit','referral','bonus'].includes(tx.type);
+      const dt=new Date(tx.time).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      return `<div class="tx-item">
+        <div class="tx-icon ${tx.type}">${icon}</div>
+        <div class="tx-desc"><div class="tx-title">${tx.desc}</div><div class="tx-time">${dt}</div></div>
+        <div class="tx-amt ${isPlus?'plus':'minus'}">${isPlus?'+':'-'}₹${tx.amount}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Ticker ──
+  async function loadTicker(){
+    const lb=await getLeaderboard();
+    if(lb.length) document.getElementById('liveTicker').innerHTML=lb.slice(0,6).map(u=>`🎉 ${u.name} won ₹${(u.totalWins||0).toLocaleString('en-IN')}`).join(' &nbsp;&nbsp; ');
+  }
+
+  // ── Refresh balance ──
+  window.refreshBalance=async function(){
+    userData=await getUser(cu);
+    if(userData) renderAllData();
+  };
+
+  // ── Helpers ──
+  window.copyRefCode=function(){copyText(document.getElementById('promoRefCode').textContent);};
+  window.copyText=function(t){navigator.clipboard.writeText(t).then(()=>alert('✅ Copied: '+t));};
+  window.shareRefCode=function(){
+    const code=userData?.referralCode||'';
+    const txt=`Join Kalyaan — India's #1 Prediction Game! Use my referral code *${code}* and get ₹20 bonus! 🎁`;
+    if(navigator.share){navigator.share({title:'Kalyaan',text:txt});}
+    else{navigator.clipboard.writeText(txt).then(()=>alert('✅ Share text copied!'));}
+  };
+  window.doLogout=function(){clearSession();window.location.href='index.html';};
+  window.openWA=function(m){
+    const msg=m==='deposit'?'Hello, I want to *Deposit* coins on Kalyaan.':'Hello, I want to *Withdraw* coins on Kalyaan.';
+    window.open('https://wa.me/918517923368?text='+encodeURIComponent(msg),'_blank');
+  };
+  function updateThemeBtn(){document.getElementById('themeBtn').textContent=getTheme()==='dark'?'☀️':'🌙';}
+  window.switchTheme=function(){toggleTheme();updateThemeBtn();};
+</script>
+</body>
+</html>
