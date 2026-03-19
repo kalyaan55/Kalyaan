@@ -584,7 +584,7 @@ body { background:var(--bg); padding-bottom:20px; transition:background .3s; }
     drawing=false;
     const room=GAME_ROOMS.find(r=>r.id===roomId);
     const state=await getGameState(roomId);
-    if(state.lastTick){const elapsed=Math.floor((Date.now()-state.lastTick)/1000);const room=GAME_ROOMS.find(r=>r.id===roomId);timeLeft=Math.max(0,(state.timeLeft||room.duration)-elapsed);}else{timeLeft=state.timeLeft;}
+    if(state.lastTick){const elapsed=Math.floor((Date.now()-state.lastTick)/1000);
     currentPeriod=state.period||1;
     document.getElementById('periodNum').textContent=currentPeriod;
     myBets=await getUserBets(cu,roomId);
