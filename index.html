@@ -190,41 +190,38 @@ body {
 };
 
   window.doRegister = async function() {
-    const name   = document.getElementById('regName').value.trim();
-    const user   = document.getElementById('regUser').value.trim().toLowerCase();
-    const pass   = document.getElementById('regPass').value;
-    const refCode= document.getElementById('regRef').value.trim().toUpperCase();
-    const msg    = document.getElementById('registerMsg');
-    const btn    = document.getElementById('regBtn');
-    msg.className='auth-msg error';
+  const name   = document.getElementById('regName').value.trim();
+  const user   = document.getElementById('regUser').value.trim().toLowerCase();
+  const pass   = document.getElementById('regPass').value;
+  const refCode= document.getElementById('regRef').value.trim().toUpperCase();
+  const msg    = document.getElementById('registerMsg');
+  const btn    = document.getElementById('regBtn');
+  msg.className='auth-msg error';
 
-    if (!name||!user||!pass)  { msg.textContent='Fill all fields'; return; }
-    if (user.length<3)         { msg.textContent='Username min 3 chars'; return; }
-    if (pass.length<6)         { msg.textContent='Password min 6 chars'; return; }
+  if (!name||!user||!pass) { msg.textContent='Fill all fields'; return; }
+  if (user.length<3)        { msg.textContent='Username min 3 chars'; return; }
+  if (pass.length<6)        { msg.textContent='Password min 6 chars'; return; }
 
-    btn.textContent='Creating...'; btn.disabled=true;
-    try {
-      const existing = await getUser(user);
-      if (existing) { msg.textContent='Username already taken'; return; }
-      const uid = await getNextUID();
-      const myRefCode = (user.toUpperCase().slice(0,4)+Math.floor(1000+Math.random()*9000));
-      let refBonus = 0;
-      if (refCode) refBonus = await applyReferral(user, refCode);
-
-      await saveUser(user, {
-        password:pass, name, uid,
-        balance:refBonus,
-        totalWins:0, bets:0, blocked:false,
-        referralCode:myRefCode, referralCount:0, referralEarnings:0,
-        joinedAt:Date.now(), lastLoginBonus:''
-      });
-      if (refBonus>0) await addTransaction(user,{type:'referral',amount:refBonus,desc:'Welcome referral bonus',time:Date.now()});
-
-      msg.className='auth-msg success';
-      msg.textContent = refBonus>0 ? `✅ Account created! +₹${refBonus} bonus!` : '✅ Account created! Logging in...';
-      setTimeout(() => { setSession(user); window.location.href='home.html'; }, 900);
-    } finally { btn.textContent='CREATE ACCOUNT'; btn.disabled=false; }
-  };
+  btn.textContent='Creating...'; btn.disabled=true;
+  try {
+    const res = await fetch('https://kalyaan-backend-production.up.railway.app/auth/register', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name, username:user, password:pass, referralCode:refCode})
+    });
+    const data = await res.json();
+    if (!data.success) { msg.textContent=data.msg||'Registration failed'; return; }
+    msg.className='auth-msg success';
+    msg.textContent = '✅ Account created! Logging in...';
+    localStorage.setItem('ky_token', data.token);
+    setSession(user);
+    setTimeout(() => { window.location.href='home.html'; }, 900);
+  } catch(e) {
+    msg.textContent='Server error. Try again.';
+  } finally {
+    btn.textContent='CREATE ACCOUNT'; btn.disabled=false;
+  }
+};
 </script>
 </body>
 </html>
