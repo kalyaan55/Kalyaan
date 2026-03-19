@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalyaan Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07080f;
+  --bg2:#0d0f1a;
+  --bg3:#12142299;
+  --border:#1e2035;
+  --border2:#2a2d4a;
+  --primary:#6c63ff;
+  --primary2:#a78bfa;
+  --green:#10b981;
+  --red:#ef4444;
+  --gold:#f59e0b;
+  --text:#e8e8f0;
+  --muted:#5a5c7a;
+  --card:#0f1020;
+}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* SCANLINE EFFECT */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999;}
+
+/* LOCK SCREEN */
+#lockScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;}
+.lock-wrap{width:100%;max-width:380px;}
+.lock-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.3);border-radius:100px;padding:6px 14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--primary2);margin-bottom:28px;}
+.lock-badge span{width:6px;height:6px;background:var(--primary);border-radius:50%;animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.lock-title{font-size:32px;font-weight:800;line-height:1.1;margin-bottom:6px;}
+.lock-title span{color:var(--primary2);}
+.lock-sub{font-size:13px;color:var(--muted);margin-bottom:32px;}
+.lock-form{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;}
+.lock-input{background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;padding:13px 16px;outline:none;transition:border-color .2s;}
+.lock-input:focus{border-color:var(--primary);}
+.lock-input::placeholder{color:var(--muted);}
+.lock-btn{background:linear-gradient(135deg,var(--primary),#8b5cf6);border:none;border-radius:10px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:14px;cursor:pointer;letter-spacing:.5px;transition:opacity .2s;}
+.lock-btn:hover{opacity:.9;}
+.lock-err{font-size:12px;color:var(--red);text-align:center;min-height:18px;font-family:'Space Mono',monospace;}
+.lock-attempts{font-size:11px;color:var(--muted);text-align:center;font-family:'Space Mono',monospace;}
+
+/* ADMIN PANEL */
+#adminPanel{display:none;}
+
+/* HEADER */
+.adm-header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.adm-logo{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.adm-logo .dot{width:8px;height:8px;background:var(--primary);border-radius:50%;box-shadow:0 0 8px var(--primary);}
+.adm-logo span{color:var(--primary2);}
+.btn-logout{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:var(--red);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:8px 16px;cursor:pointer;transition:all .2s;}
+.btn-logout:hover{background:var(--red);color:#fff;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card:nth-child(1)::before{background:linear-gradient(90deg,var(--primary),transparent);}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,var(--green),transparent);}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,#3b82f6,transparent);}
+.stat-card:nth-child(4)::before{background:linear-gradient(90deg,var(--gold),transparent);}
+.sc-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;font-family:'Space Mono',monospace;}
+.sc-val{font-size:24px;font-weight:800;margin-top:6px;}
+
+/* SECTION */
+.section{padding:0 14px;margin-bottom:6px;}
+.section-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* GAME PANEL */
+.game-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;margin:0 14px 14px;overflow:hidden;}
+.gp-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+.gp-title{font-size:13px;font-weight:700;}
+.live-badge{display:flex;align-items:center;gap:5px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:100px;padding:4px 10px;}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1s infinite;}
+.live-txt{font-size:10px;font-weight:700;color:var(--green);font-family:'Space Mono',monospace;}
+
+/* ROOM TABS */
+.room-tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.room-tabs::-webkit-scrollbar{display:none;}
+.rtab{flex:1;min-width:65px;background:none;border:none;border-bottom:2px solid transparent;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:10px 6px;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;transition:color .2s;}
+.rtab.active{color:var(--primary2);border-bottom-color:var(--primary2);}
+.rtab-time{font-size:15px;font-weight:800;font-family:'Space Mono',monospace;}
+
+/* ROOM INFO */
+.room-info{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.ri-item{background:var(--bg2);border-radius:10px;padding:10px 12px;text-align:center;}
+.ri-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Space Mono',monospace;}
+.ri-val{font-size:18px;font-weight:800;margin-top:4px;}
+.ri-val.timer{color:var(--primary2);font-family:'Space Mono',monospace;}
+.ri-val.timer.urgent{color:var(--red);}
+.ri-val.period{color:var(--gold);}
+.ri-val.forced{color:var(--green);font-size:14px;}
+
+/* FORCE RESULT */
+.force-section{padding:0 16px 16px;}
+.force-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Space Mono',monospace;margin-bottom:10px;}
+.force-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px;}
+.force-num{aspect-ratio:1;border-radius:10px;background:var(--bg2);border:1.5px solid var(--border2);color:var(--muted);font-size:16px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;transition:all .15s;}
+.force-num:hover{border-color:var(--primary);color:var(--primary2);}
+.force-num.sel{background:rgba(108,99,255,.2);border-color:var(--primary);color:var(--primary2);box-shadow:0 0 12px rgba(108,99,255,.3);}
+.force-btns{display:flex;gap:8px;}
+.btn-force{flex:1;background:linear-gradient(135deg,var(--primary),#8b5cf6);border:none;border-radius:10px;color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:11px;cursor:pointer;}
+.btn-clear{flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;color:var(--muted);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:11px;cursor:pointer;}
+.force-status{font-size:11px;color:var(--gold);margin-top:8px;min-height:16px;text-align:center;font-family:'Space Mono',monospace;}
+
+/* HISTORY DOTS */
+.hist-section{padding:0 16px 14px;}
+.hist-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'Space Mono',monospace;margin-bottom:8px;}
+.hist-dots{display:flex;gap:6px;flex-wrap:wrap;}
+.hdot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Space Mono',monospace;}
+.hdot-red{background:rgba(239,68,68,.1);color:#ef4444;border:1.5px solid rgba(239,68,68,.3);}
+.hdot-green{background:rgba(16,185,129,.1);color:#10b981;border:1.5px solid rgba(16,185,129,.3);}
+.hdot-violet{background:rgba(108,99,255,.1);color:#a78bfa;border:1.5px solid rgba(108,99,255,.3);}
+
+/* SEARCH */
+.search-wrap{padding:0 14px 10px;}
+.search-box{width:100%;background:var(--card);border:1.5px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;padding:11px 14px;outline:none;transition:border-color .2s;}
+.search-box:focus{border-color:var(--primary);}
+.search-box::placeholder{color:var(--muted);}
+
+/* USERS */
+.users-wrap{padding:0 14px;}
+.user-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;transition:border-color .2s;}
+.user-card:hover{border-color:var(--border2);}
+.user-card.blocked{background:#0f0608;border-color:rgba(239,68,68,.2);}
+.uc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.uc-info{}
+.uc-name{font-size:14px;font-weight:700;}
+.uc-meta{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
+.uc-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;font-family:'Space Mono',monospace;}
+.badge-active{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.badge-blocked{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.uc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.uc-stat{background:var(--bg2);border-radius:8px;padding:8px;text-align:center;}
+.uc-stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:'Space Mono',monospace;}
+.uc-stat-val{font-size:13px;font-weight:700;margin-top:3px;}
+.uc-actions{display:flex;gap:6px;}
+.btn-edit{flex:1;background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.3);border-radius:8px;color:var(--primary2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:8px;cursor:pointer;}
+.btn-block{flex:1;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:var(--red);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:8px;cursor:pointer;}
+.btn-unblock{flex:1;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;color:var(--green);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:8px;cursor:pointer;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:500;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:480px;}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:20px;}
+.form-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:'Space Mono',monospace;display:block;margin-bottom:6px;}
+.form-input{width:100%;background:var(--bg2);border:1.5px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;padding:11px 14px;outline:none;margin-bottom:14px;transition:border-color .2s;}
+.form-input:focus{border-color:var(--primary);}
+.coins-row{display:flex;gap:8px;margin-bottom:14px;}
+.coins-row .form-input{flex:1;margin-bottom:0;}
+.btn-add{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;color:var(--green);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:0 14px;cursor:pointer;white-space:nowrap;}
+.btn-rmv{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:var(--red);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:0 14px;cursor:pointer;white-space:nowrap;}
+.modal-btns{display:flex;gap:10px;margin-top:4px;}
+.btn-cancel{flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;padding:12px;cursor:pointer;}
+.btn-save{flex:2;background:linear-gradient(135deg,var(--primary),#8b5cf6);border:none;border-radius:10px;color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:12px;cursor:pointer;}
+.no-users{text-align:center;color:var(--muted);padding:30px;font-size:13px;font-family:'Space Mono',monospace;}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lockScreen">
+  <div class="lock-wrap">
+    <div class="lock-badge"><span></span>RESTRICTED ACCESS</div>
+    <div class="lock-title">Admin<br><span>Control Panel</span></div>
+    <div class="lock-sub">Authorized personnel only. All actions are logged.</div>
+    <div class="lock-form">
+      <input class="lock-input" id="lockUser" placeholder="Username" onkeydown="if(event.key==='Enter')tryUnlock()">
+      <input class="lock-input" type="password" id="lockPass" placeholder="Password" onkeydown="if(event.key==='Enter')tryUnlock()">
+      <input class="lock-input" type="password" id="lockSecret" placeholder="Admin secret key" onkeydown="if(event.key==='Enter')tryUnlock()">
+      <button class="lock-btn" onclick="tryUnlock()">Access Panel →</button>
+      <div class="lock-err" id="lockErr"></div>
+      <div class="lock-attempts" id="lockAttempts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+  <div class="adm-header">
+    <div class="adm-logo"><div class="dot"></div>⚙️ <span>Kalyaan</span> Admin</div>
+    <button class="btn-logout" onclick="adminLogout()">Logout</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="sc-label">Total Users</div><div class="sc-val" style="color:var(--primary2)" id="statUsers">—</div></div>
+    <div class="stat-card"><div class="sc-label">Active Users</div><div class="sc-val" style="color:var(--green)" id="statActive">—</div></div>
+    <div class="stat-card"><div class="sc-label">Total Bets</div><div class="sc-val" style="color:#3b82f6" id="statBets">—</div></div>
+    <div class="stat-card"><div class="sc-label">Wins Paid</div><div class="sc-val" style="color:var(--gold)" id="statWins">—</div></div>
+  </div>
+
+  <!-- WinGo Control -->
+  <div class="section" style="margin-bottom:10px"><div class="section-title">🎮 WinGo Control</div></div>
+  <div class="game-panel">
+    <div class="gp-header">
+      <div class="gp-title">Live Room Control</div>
+      <div class="live-badge"><div class="live-dot"></div><div class="live-txt">LIVE</div></div>
+    </div>
+    <div class="room-tabs" id="roomTabs">
+      <button class="rtab active" onclick="selectRoom('wingo30s',this)"><span class="rtab-time">30s</span><span>WinGo</span></button>
+      <button class="rtab" onclick="selectRoom('wingo1m',this)"><span class="rtab-time">1m</span><span>WinGo</span></button>
+      <button class="rtab" onclick="selectRoom('wingo3m',this)"><span class="rtab-time">3m</span><span>WinGo</span></button>
+      <button class="rtab" onclick="selectRoom('wingo5m',this)"><span class="rtab-time">5m</span><span>WinGo</span></button>
+    </div>
+    <div class="room-info">
+      <div class="ri-item"><div class="ri-label">Period</div><div class="ri-val period" id="admPeriod">—</div></div>
+      <div class="ri-item"><div class="ri-label">Time Left</div><div class="ri-val timer" id="admTimer">—</div></div>
+      <div class="ri-item"><div class="ri-label">Forced</div><div class="ri-val forced" id="admForced">None</div></div>
+    </div>
+    <div class="force-section">
+      <div class="force-label">⚡ Force Next Result</div>
+      <div class="force-grid" id="forceNums">
+        <button class="force-num" onclick="selectForce(0)">0</button>
+        <button class="force-num" onclick="selectForce(1)">1</button>
+        <button class="force-num" onclick="selectForce(2)">2</button>
+        <button class="force-num" onclick="selectForce(3)">3</button>
+        <button class="force-num" onclick="selectForce(4)">4</button>
+        <button class="force-num" onclick="selectForce(5)">5</button>
+        <button class="force-num" onclick="selectForce(6)">6</button>
+        <button class="force-num" onclick="selectForce(7)">7</button>
+        <button class="force-num" onclick="selectForce(8)">8</button>
+        <button class="force-num" onclick="selectForce(9)">9</button>
+      </div>
+      <div class="force-btns">
+        <button class="btn-force" onclick="applyForce()">⚡ Set Result</button>
+        <button class="btn-clear" onclick="clearForce()">✕ Clear</button>
+      </div>
+      <div class="force-status" id="forceStatus"></div>
+    </div>
+    <div class="hist-section">
+      <div class="hist-label">Recent Results</div>
+      <div class="hist-dots" id="histDots"><span style="color:var(--muted);font-size:11px;font-family:'Space Mono',monospace">Loading...</span></div>
+    </div>
+  </div>
+
+  <!-- Users -->
+  <div class="section" style="margin-bottom:10px"><div class="section-title">👥 Players</div></div>
+  <div class="search-wrap">
+    <input class="search-box" id="searchBox" oninput="filterUsers()" placeholder="🔍  Search by name, username or ID...">
+  </div>
+  <div class="users-wrap" id="usersList"><div class="no-users">Loading players...</div></div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit Player</div>
+    <div class="modal-sub" id="editSub">@username</div>
+    <label class="form-label">Display Name</label>
+    <input class="form-input" id="editName" placeholder="Name">
+    <label class="form-label">Set Balance (₹)</label>
+    <input class="form-input" type="number" id="editBalance" placeholder="Balance">
+    <label class="form-label">Add / Remove Coins</label>
+    <div class="coins-row">
+      <input class="form-input" type="number" id="editCoins" placeholder="Amount">
+      <button class="btn-add" onclick="adjustCoins(1)">+Add</button>
+      <button class="btn-rmv" onclick="adjustCoins(-1)">−Remove</button>
+    </div>
+    <label class="form-label">New Password <span style="font-weight:400;text-transform:none;font-family:'Syne',sans-serif">(blank = no change)</span></label>
+    <input class="form-input" type="password" id="editPass" placeholder="New password">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="btn-save" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import {
+  ADMIN_USER, ADMIN_PASS, ADMIN_SECRET,
+  GAME_ROOMS,
+  getAdminSession, setAdminSession, clearAdminSession,
+  getAllUsers, updateUser, addTransaction,
+  getGameState, setForcedResult, clearForcedResult,
+  getGameHistory,
+  db, ref, onValue
+} from './firebase-config.js';
+
+let allUsersData={}, editingKey=null;
+let selectedForce=null, currentRoom='wingo30s';
+let wrongAttempts=0; const MAX=5;
+let timerInterval=null, timeLeft=30;
+
+// Check existing session
+if(getAdminSession()) showAdmin();
+
+window.tryUnlock=function(){
+  const u=document.getElementById('lockUser').value.trim().toLowerCase();
+  const p=document.getElementById('lockPass').value;
+  const s=document.getElementById('lockSecret').value;
+  const err=document.getElementById('lockErr');
+  const att=document.getElementById('lockAttempts');
+  if(wrongAttempts>=MAX){err.textContent='Too many attempts. Refresh to try again.';return;}
+  if(u===ADMIN_USER&&p===ADMIN_PASS&&s===ADMIN_SECRET){
+    setAdminSession();showAdmin();
+  }else{
+    wrongAttempts++;
+    const left=MAX-wrongAttempts;
+    err.textContent='Invalid credentials';
+    att.textContent=left>0?`${left} attempts remaining`:'Locked';
+    document.getElementById('lockPass').value='';
+    document.getElementById('lockSecret').value='';
+  }
+};
+
+function showAdmin(){
+  document.getElementById('lockScreen').style.display='none';
+  document.getElementById('adminPanel').style.display='block';
+  loadUsers();
+  setInterval(loadUsers,10000);
+  loadRoom('wingo30s');
+}
+
+window.adminLogout=function(){
+  clearAdminSession();
+  window.location.reload();
+};
+
+// ── Room Control ──
+window.selectRoom=async function(roomId,btn){
+  document.querySelectorAll('.rtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  await loadRoom(roomId);
+};
+
+async function loadRoom(roomId){
+  currentRoom=roomId;
+  selectedForce=null;
+  document.querySelectorAll('.force-num').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('forceStatus').textContent='';
+  if(timerInterval)clearInterval(timerInterval);
+
+  const state=await getGameState(roomId);
+  timeLeft=state.timeLeft||30;
+  updateTimer(timeLeft);
+  document.getElementById('admPeriod').textContent='#'+(state.period||1);
+  document.getElementById('admForced').textContent=state.forcedResult!=null?`No. ${state.forcedResult}`:'None';
+  await loadHistory(roomId);
+
+  timerInterval=setInterval(()=>{
+    timeLeft--;if(timeLeft<0)timeLeft=0;
+    updateTimer(timeLeft);
+  },1000);
+
+  onValue(ref(db,'rooms/'+roomId+'/state'),async(snap)=>{
+    if(!snap.exists())return;
+    const s=snap.val();
+    const room=GAME_ROOMS.find(r=>r.id===roomId)||GAME_ROOMS[0];
+    const elapsed=Math.floor((Date.now()-(s.startTime||Date.now()))/1000);
+    timeLeft=Math.max(0,(s.duration||room.duration)-(elapsed%(s.duration||room.duration)));
+    document.getElementById('admPeriod').textContent='#'+(s.period||1);
+    document.getElementById('admForced').textContent=s.forcedResult!=null?`No. ${s.forcedResult}`:'None';
+    await loadHistory(roomId);
+  });
+}
+
+function updateTimer(t){
+  const m=Math.floor(t/60),s=t%60;
+  const el=document.getElementById('admTimer');
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className='ri-val timer'+(t<=5?' urgent':'');
+}
+
+async function loadHistory(roomId){
+  const h=await getGameHistory(roomId);
+  const NUM_COLORS={0:'violet',1:'green',2:'red',3:'green',4:'red',5:'violet',6:'green',7:'red',8:'green',9:'red'};
+  document.getElementById('histDots').innerHTML=h.slice(0,12).map(r=>{
+    const c=r.color==='violet'?'hdot-violet':r.color==='red'?'hdot-red':'hdot-green';
+    return `<div class="hdot ${c}">${r.number}</div>`;
+  }).join('')||'<span style="color:var(--muted);font-size:11px;font-family:\'Space Mono\',monospace">No rounds yet</span>';
+}
+
+window.selectForce=function(n){
+  selectedForce=n;
+  document.querySelectorAll('.force-num').forEach((b,i)=>b.classList.toggle('sel',i===n));
+};
+window.applyForce=async function(){
+  if(selectedForce===null){document.getElementById('forceStatus').textContent='⚠ Select a number first!';return;}
+  await setForcedResult(currentRoom,selectedForce);
+  document.getElementById('admForced').textContent=`No. ${selectedForce}`;
+  document.getElementById('forceStatus').textContent=`✅ Set! Number ${selectedForce} queued for next draw`;
+};
+window.clearForce=async function(){
+  await clearForcedResult(currentRoom);
+  selectedForce=null;
+  document.querySelectorAll('.force-num').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('admForced').textContent='None';
+  document.getElementById('forceStatus').textContent='✕ Cleared — next result will be random';
+};
+
+// ── Users ──
+async function loadUsers(){
+  allUsersData=await getAllUsers();
+  renderStats();
+  filterUsers();
+}
+
+function renderStats(){
+  const list=Object.values(allUsersData);
+  document.getElementById('statUsers').textContent=list.length;
+  document.getElementById('statActive').textContent=list.filter(u=>!u.blocked).length;
+  document.getElementById('statBets').textContent=list.reduce((a,u)=>a+(u.bets||0),0).toLocaleString('en-IN');
+  document.getElementById('statWins').textContent='₹'+list.reduce((a,u)=>a+(u.totalWins||0),0).toLocaleString('en-IN');
+}
+
+window.filterUsers=function(){
+  const q=document.getElementById('searchBox').value.trim().toLowerCase();
+  const filtered=Object.entries(allUsersData).filter(([k,u])=>{
+    if(!q)return true;
+    return k.includes(q)||(u.name||'').toLowerCase().includes(q)||(u.uid||'').toLowerCase().includes(q);
+  });
+  const wrap=document.getElementById('usersList');
+  if(!filtered.length){wrap.innerHTML='<div class="no-users">No players found</div>';return;}
+  wrap.innerHTML=filtered.map(([k,u])=>`
+    <div class="user-card ${u.blocked?'blocked':''}">
+      <div class="uc-top">
+        <div class="uc-info">
+          <div class="uc-name">${u.name||k}</div>
+          <div class="uc-meta">@${k} · ${u.uid||'—'}</div>
+        </div>
+        <div class="uc-badge ${u.blocked?'badge-blocked':'badge-active'}">${u.blocked?'BLOCKED':'ACTIVE'}</div>
+      </div>
+      <div class="uc-stats">
+        <div class="uc-stat"><div class="uc-stat-label">Balance</div><div class="uc-stat-val" style="color:var(--gold)">₹${(u.balance||0).toLocaleString('en-IN')}</div></div>
+        <div class="uc-stat"><div class="uc-stat-label">Bets</div><div class="uc-stat-val" style="color:#3b82f6">${u.bets||0}</div></div>
+        <div class="uc-stat"><div class="uc-stat-label">Wins</div><div class="uc-stat-val" style="color:var(--green)">₹${(u.totalWins||0).toLocaleString('en-IN')}</div></div>
+      </div>
+      <div class="uc-actions">
+        <button class="btn-edit" onclick="openEdit('${k}')">✏ Edit</button>
+        ${u.blocked
+          ?`<button class="btn-unblock" onclick="toggleBlock('${k}',false)">✓ Unblock</button>`
+          :`<button class="btn-block" onclick="toggleBlock('${k}',true)">⊘ Block</button>`
+        }
+      </div>
+    </div>
+  `).join('');
+};
+
+window.toggleBlock=async function(username,block){
+  await updateUser(username,{blocked:block});
+  allUsersData[username].blocked=block;
+  filterUsers();
+};
+
+window.openEdit=function(username){
+  editingKey=username;
+  const u=allUsersData[username];
+  document.getElementById('editSub').textContent='@'+username;
+  document.getElementById('editName').value=u.name||'';
+  document.getElementById('editBalance').value=u.balance||0;
+  document.getElementById('editCoins').value='';
+  document.getElementById('editPass').value='';
+  document.getElementById('editModal').classList.add('open');
+};
+window.closeEdit=function(){
+  document.getElementById('editModal').classList.remove('open');
+  editingKey=null;
+};
+
+window.adjustCoins=async function(dir){
+  if(!editingKey)return;
+  const amt=parseInt(document.getElementById('editCoins').value)||0;
+  if(!amt)return;
+  const u=allUsersData[editingKey];
+  const delta=dir*Math.abs(amt);
+  const newBal=Math.max(0,(u.balance||0)+delta);
+  await updateUser(editingKey,{balance:newBal});
+  await addTransaction(editingKey,{type:delta>0?'deposit':'withdraw',amount:Math.abs(delta),desc:delta>0?'Admin added coins':'Admin removed coins',time:Date.now()});
+  allUsersData[editingKey].balance=newBal;
+  document.getElementById('editBalance').value=newBal;
+  document.getElementById('editCoins').value='';
+};
+
+window.saveEdit=async function(){
+  if(!editingKey)return;
+  const updates={};
+  const name=document.getElementById('editName').value.trim();
+  const bal=parseInt(document.getElementById('editBalance').value);
+  const pass=document.getElementById('editPass').value;
+  if(name)updates.name=name;
+  if(!isNaN(bal))updates.balance=Math.max(0,bal);
+  if(pass&&pass.length>=6){
+    // Note: password hashing should be done server-side ideally
+    updates.passwordHash=pass;
+  }
+  await updateUser(editingKey,updates);
+  Object.assign(allUsersData[editingKey],updates);
+  closeEdit();
+  filterUsers();
+  renderStats();
+};
+</script>
+</body>
+</html>
