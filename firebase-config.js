@@ -12,9 +12,9 @@ const firebaseConfig = {
   databaseURL: "https://colorwin-ad4cc-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "colorwin-ad4cc",
   storageBucket: "colorwin-ad4cc.firebasestorage.app",
-  messagingSenderId: "289877120544",
-  appId: "1:289877120544:web:e8b434073140fb476fce4"
-};
+  const ADMIN_USER   = 'admin';
+const ADMIN_PASS   = 'admin@kalyaan123';
+const ADMIN_SECRET = 'SuJeniHe1493u484smdn';
 
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
