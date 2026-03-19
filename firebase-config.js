@@ -12,9 +12,9 @@ const firebaseConfig = {
   databaseURL: "https://colorwin-ad4cc-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "colorwin-ad4cc",
   storageBucket: "colorwin-ad4cc.firebasestorage.app",
-  const ADMIN_USER   = 'admin';
-const ADMIN_PASS   = 'admin@kalyaan123';
-const ADMIN_SECRET = 'SuJeniHe1493u484smdn';
+  messagingSenderId: "289877120544",
+  appId: "1:289877120544:web:e8b434073140fb476fce4"
+};
 
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
@@ -22,7 +22,7 @@ const db  = getDatabase(app);
 // ── Admin credentials ──
 const ADMIN_USER   = 'admin';
 const ADMIN_PASS   = 'admin@kalyaan123';
-const ADMIN_SECRET = 'KY_ADMIN_2024_SECRET';
+const ADMIN_SECRET = 'SuJeniHe1493u484smdn';
 
 // ── Game Rooms (WinGo style) ──
 const GAME_ROOMS = [
