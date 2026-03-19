@@ -146,7 +146,7 @@ async function getGameState(roomId) {
   }
   const raw = s.val();
   // If old format (has timeLeft), migrate to new format
-  if (raw.timeLeft !== undefined && raw.startTime === undefined) {
+  if (raw.lastTick !== undefined) {
     const init = { startTime:Date.now(), period:raw.period||1, duration:room.duration, forcedResult:raw.forcedResult||null };
     await set(ref(db,'rooms/'+roomId+'/state'), init);
     return computeState(init, room);
