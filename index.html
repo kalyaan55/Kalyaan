@@ -164,22 +164,30 @@ body {
   };
 
   window.doLogin = async function() {
-    const u   = document.getElementById('loginUser').value.trim().toLowerCase();
-    const p   = document.getElementById('loginPass').value;
-    const err = document.getElementById('loginError');
-    const btn = document.getElementById('loginBtn');
-    if (!u||!p) { err.textContent='Fill all fields'; return; }
-    if (u===ADMIN_USER && p===ADMIN_PASS) { setAdminSession(); window.location.href='admin.html'; return; }
-    btn.textContent='Checking...'; btn.disabled=true;
-    try {
-      const user = await getUser(u);
-      if (!user)              { err.textContent='Username not found'; return; }
-      if (user.password!==p)  { err.textContent='Wrong password'; return; }
-      if (user.blocked)       { err.textContent='⛔ Account blocked. Contact admin.'; return; }
-      setSession(u);
-      window.location.href='home.html';
-    } finally { btn.textContent='LOGIN'; btn.disabled=false; }
-  };
+  const u   = document.getElementById('loginUser').value.trim().toLowerCase();
+  const p   = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  if (!u||!p) { err.textContent='Fill all fields'; return; }
+  if (u===ADMIN_USER && p===ADMIN_PASS) { setAdminSession(); window.location.href='admin.html'; return; }
+  btn.textContent='Checking...'; btn.disabled=true;
+  try {
+    const res = await fetch('https://kalyaan-backend-production.up.railway.app/auth/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:u, password:p})
+    });
+    const data = await res.json();
+    if (!data.success) { err.textContent=data.msg||'Login failed'; return; }
+    localStorage.setItem('ky_token', data.token);
+    setSession(u);
+    window.location.href='home.html';
+  } catch(e) {
+    err.textContent='Server error. Try again.';
+  } finally {
+    btn.textContent='LOGIN'; btn.disabled=false;
+  }
+};
 
   window.doRegister = async function() {
     const name   = document.getElementById('regName').value.trim();
